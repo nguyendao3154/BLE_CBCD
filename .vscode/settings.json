@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "nrf_log_default_backends.h": "c",
+        "app_timer.h": "c",
+        "ble_lbs.h": "c",
+        "cambien_service.h": "c"
+    }
+}
