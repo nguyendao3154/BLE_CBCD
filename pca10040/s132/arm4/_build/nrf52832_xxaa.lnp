@@ -19,6 +19,7 @@
 ".\_build\nrfx_prs.o"
 ".\_build\nrfx_uart.o"
 ".\_build\nrfx_uarte.o"
+".\_build\nrfx_saadc.o"
 ".\_build\app_button.o"
 ".\_build\app_error.o"
 ".\_build\app_error_handler_keil.o"

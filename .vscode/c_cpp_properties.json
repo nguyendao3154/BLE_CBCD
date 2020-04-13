@@ -4,8 +4,11 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "D:/nRF5_SDK_16.0.0_98a08e2/components/libraries/**",
-                "D:/nRF5_SDK_16.0.0_98a08e2/components/ble"
+                "D:/NRF_SDK/components/libraries/**",
+                "D:/NRF_SDK/components/ble",
+                "D:/NRF_SDK/integration/nrfx/legacy",
+                "D:/NRF_SDK/modules/nrfx/drivers/include",
+                "D:/NRF_SDK/modules/nrfx/hal"
                 
             ],
             "defines": [

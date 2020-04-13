@@ -3,6 +3,10 @@
         "nrf_log_default_backends.h": "c",
         "app_timer.h": "c",
         "ble_lbs.h": "c",
-        "cambien_service.h": "c"
+        "cambien_service.h": "c",
+        "nrf_log_ctrl.h": "c",
+        "nrf_delay.h": "c",
+        "nrf_drv_saadc.h": "c",
+        "nrfx_saadc.h": "c"
     }
 }

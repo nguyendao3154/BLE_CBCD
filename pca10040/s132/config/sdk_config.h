@@ -3233,7 +3233,7 @@
 // </e>
 
 // </e>
-
+#define NRFX_SAADC_ENABLED 1
 // <e> NRFX_SAADC_ENABLED - nrfx_saadc - SAADC peripheral driver
 //==========================================================
 #ifndef NRFX_SAADC_ENABLED
@@ -5261,7 +5261,7 @@
 #endif
 
 // </e>
-
+#define SAADC_ENABLED 1
 // <e> SAADC_ENABLED - nrf_drv_saadc - SAADC peripheral driver - legacy layer
 //==========================================================
 #ifndef SAADC_ENABLED
