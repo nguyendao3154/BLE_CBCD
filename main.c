@@ -83,7 +83,7 @@
 #define MAX_CONN_INTERVAL MSEC_TO_UNITS(200, UNIT_1_25_MS) /**< Maximum acceptable connection interval (1 second). */
 #define SLAVE_LATENCY 0                                    /**< Slave latency. */
 #define CONN_SUP_TIMEOUT MSEC_TO_UNITS(4000, UNIT_10_MS)   /**< Connection supervisory time-out (4 seconds). */
-
+#define PIR_TIMEOUT 10000                                   // PIR timeout 10s
 #define FIRST_CONN_PARAMS_UPDATE_DELAY APP_TIMER_TICKS(20000) /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (15 seconds). */
 #define NEXT_CONN_PARAMS_UPDATE_DELAY APP_TIMER_TICKS(5000)   /**< Time between each call to sd_ble_gap_conn_param_update after the first call (5 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT 3                        /**< Number of attempts before giving up the connection parameter negotiation. */
@@ -99,7 +99,7 @@
 static nrf_saadc_value_t m_buffer[SAMPLES_IN_BUFFER];
 
 APP_TIMER_DEF(m_adc_id);
-
+APP_TIMER_DEF(timer_systick_id);
 NRF_BLE_GATT_DEF(m_gatt); /**< GATT module instance. */
 BLE_CB_DEF(m_cb);
 
@@ -112,6 +112,8 @@ static uint8_t pin_8bit_value;
 static uint32_t pin_value;
 bool adc_flag = false;
 /**@brief Struct that contains pointers to the encoded advertising data. */
+uint32_t sys_tick;
+uint8_t pir_state;
 static ble_gap_adv_data_t m_adv_data =
     {
         .adv_data =
@@ -133,9 +135,9 @@ void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
 
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
         APP_ERROR_CHECK(err_code);
-        pin_value = (p_event->data.done.p_buffer[0])* 12 * 11 / 1024;
+        pin_value = (p_event->data.done.p_buffer[0]) * 12 * 11 / 1024;
         pin_8bit_value = (uint8_t)pin_value;
-        NRF_LOG_INFO("%d\r\n", pin_8bit_value);
+        //NRF_LOG_INFO("%d\r\n", pin_8bit_value);
     }
 }
 void saadc_init(void)
@@ -214,12 +216,12 @@ void in_out1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     OUT1_FLAG = true;
     if (nrf_gpio_pin_read(OUT1_PIN))
     {
-        out1_logic_level = 1;
+        pir_state = 0;
         NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
-        out1_logic_level = 0;
+        pir_state = 1;
         NRF_LOG_INFO("CD 1\r\n");
     }
 }
@@ -242,12 +244,12 @@ void in_out2_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     OUT2_FLAG = true;
     if (nrf_gpio_pin_read(OUT2_PIN))
     {
-        out2_logic_level = 1;
+        pir_state = 0;
         NRF_LOG_INFO("CD 2\r\n");
     }
     else
     {
-        out2_logic_level = 0;
+        pir_state = 1;
         NRF_LOG_INFO("CD 2\r\n");
     }
 }
@@ -272,12 +274,23 @@ void interrupt_init()
     out1_interrupt_init();
     out2_interrupt_init();
 }
+void systick_handle(void *p_context)
+{
+    sys_tick++;
+}
+
 static void timers_init(void)
 {
     // Initialize timer module, making it use the scheduler
     ret_code_t err_code = app_timer_init();
     APP_ERROR_CHECK(err_code);
-    
+
+    err_code = app_timer_create(&timer_systick_id,
+                                APP_TIMER_MODE_REPEATED,
+                                systick_handle);
+    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(1), NULL));
+
 }
 
 static void gap_params_init(void)
@@ -512,25 +525,35 @@ void task_tu()
         TU_FLAG = false;
     }
 }
+uint8_t pir_pre_state = 0, task_state = 0, task_pre_state = 0;
+
 void task_chuyendong()
 {
     ret_code_t err_code;
-    if (OUT1_FLAG)
-    {
 
-        err_code = ble_cb_chuyendong_change(m_conn_handle, &m_cb, out1_logic_level);
-
-        check_error_ble(err_code);
-        OUT1_FLAG = false;
-    }
-    if (OUT2_FLAG)
-    {
-
-        err_code = ble_cb_chuyendong_change(m_conn_handle, &m_cb, out2_logic_level);
-
-        check_error_ble(err_code);
-        OUT2_FLAG = false;
-    }
+            if ((sys_tick > PIR_TIMEOUT) && !pir_state)         // ko co gi 
+            {
+                task_state = 2;
+                // NRF_LOG_INFO("task 2");
+            }
+            if ((sys_tick > PIR_TIMEOUT) && pir_state)          // co chuyen dong
+            {
+                task_state = 1;
+                // NRF_LOG_INFO("task 1");
+            }
+            if (task_pre_state != task_state)
+            {
+                err_code = ble_cb_chuyendong_change(m_conn_handle, &m_cb, pir_state);
+                check_error_ble(err_code);
+            }
+            if (pir_state)
+            {
+                sys_tick = 0;
+            }
+            // NRF_LOG_INFO("%d\n", sys_tick);
+            // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_state, task_pre_state, task_state);
+            pir_pre_state = pir_state;
+            task_pre_state = task_state;
 }
 static void power_management_init(void)
 {
@@ -580,11 +603,11 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-			
+
         task_tu();
         task_chuyendong();
-        idle_state_handle();
         task_adc();
+        idle_state_handle();
     }
 }
 
