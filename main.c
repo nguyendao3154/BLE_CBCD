@@ -68,29 +68,29 @@
 #include "cambien_service.h"
 #include "nrf_drv_gpiote.h"
 #include "nrf_drv_saadc.h"
-#define TU_PIN 13
-#define OUT1_PIN 14
-#define OUT2_PIN 15
+#define TU_PIN 3
+#define OUT1_PIN 18
+#define OUT2_PIN 13
 
-#define DEVICE_NAME "Sieu pham"                                /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME "Test adc"                                 /**< Name of device. Will be included in the advertising data. */
 #define APP_BLE_OBSERVER_PRIO 3                                /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG 1                                 /**< A tag identifying the SoftDevice BLE configuration. */
 #define APP_TIMER_PRESCALER 0                                  /**< Value of the RTC1 PRESCALER register. */
 #define APP_ADV_INTERVAL 640                                   /**< The advertising interval (in units of 0.625 ms; this value corresponds to 40 ms). */
 #define APP_ADV_DURATION BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED /**< The advertising time-out (in units of seconds). When set to 0, we will never time out. */
 
-#define MIN_CONN_INTERVAL MSEC_TO_UNITS(100, UNIT_1_25_MS) /**< Minimum acceptable connection interval (0.5 seconds). */
-#define MAX_CONN_INTERVAL MSEC_TO_UNITS(200, UNIT_1_25_MS) /**< Maximum acceptable connection interval (1 second). */
-#define SLAVE_LATENCY 0                                    /**< Slave latency. */
-#define CONN_SUP_TIMEOUT MSEC_TO_UNITS(4000, UNIT_10_MS)   /**< Connection supervisory time-out (4 seconds). */
-#define PIR_TIMEOUT 10000                                   // PIR timeout 10s
+#define MIN_CONN_INTERVAL MSEC_TO_UNITS(100, UNIT_1_25_MS)    /**< Minimum acceptable connection interval (0.5 seconds). */
+#define MAX_CONN_INTERVAL MSEC_TO_UNITS(200, UNIT_1_25_MS)    /**< Maximum acceptable connection interval (1 second). */
+#define SLAVE_LATENCY 0                                       /**< Slave latency. */
+#define CONN_SUP_TIMEOUT MSEC_TO_UNITS(4000, UNIT_10_MS)      /**< Connection supervisory time-out (4 seconds). */
+#define PIR_TIMEOUT 5                                        // PIR timeout 10s
 #define FIRST_CONN_PARAMS_UPDATE_DELAY APP_TIMER_TICKS(20000) /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (15 seconds). */
 #define NEXT_CONN_PARAMS_UPDATE_DELAY APP_TIMER_TICKS(5000)   /**< Time between each call to sd_ble_gap_conn_param_update after the first call (5 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT 3                        /**< Number of attempts before giving up the connection parameter negotiation. */
 
 #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
-#define ADC_TIME_SCAN 1000 // ADC quet 1s 1 lan
+#define ADC_TIME_SCAN 100000 // ADC quet 1s 1 lan
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
 #define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN1
 
@@ -111,9 +111,11 @@ static uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buf
 static uint8_t pin_8bit_value;
 static uint32_t pin_value;
 bool adc_flag = false;
+static bool m_saadc_initialized = false;
 /**@brief Struct that contains pointers to the encoded advertising data. */
 uint32_t sys_tick;
 uint8_t pir_state;
+uint16_t pir_analog_value;
 static ble_gap_adv_data_t m_adv_data =
     {
         .adv_data =
@@ -135,9 +137,14 @@ void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
 
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
         APP_ERROR_CHECK(err_code);
-        pin_value = (p_event->data.done.p_buffer[0]) * 12 * 11 / 1024;
-        pin_8bit_value = (uint8_t)pin_value;
-        //NRF_LOG_INFO("%d\r\n", pin_8bit_value);
+        // pin_value = (p_event->data.done.p_buffer[0]) * 12 * 11 / 1024;
+        // pin_8bit_value = (uint8_t)pin_value;
+        pir_analog_value = (p_event->data.done.p_buffer[0]);
+        NRF_LOG_INFO("%d\r\n", pir_analog_value);
+        nrf_drv_saadc_uninit();                                                     //Unintialize SAADC to disable EasyDMA and save power
+        NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
+        NVIC_ClearPendingIRQ(SAADC_IRQn);                                           //Clear the SAADC interrupt if set
+        m_saadc_initialized = false;
     }
 }
 void saadc_init(void)
@@ -164,6 +171,11 @@ static void adc_handle_timer(void *p_context)
 {
     //NRF_LOG_INFO("in timer \n");
     adc_flag = true;
+    if (!m_saadc_initialized)
+    {
+        saadc_init(); //Initialize the SAADC. In the case when SAADC_SAMPLES_IN_BUFFER > 1 then we only need to initialize the SAADC when the the buffer is empty.
+    }
+    m_saadc_initialized = true;
 }
 
 static void create_ADC_timer()
@@ -182,8 +194,8 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t *p_file_name)
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-bool TU_FLAG = false, OUT1_FLAG = false, OUT2_FLAG = false;
-uint8_t tu_logic_level, out1_logic_level, out2_logic_level;
+bool TU_FLAG = false;
+uint8_t tu_logic_level;
 void in_tu_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
     TU_FLAG = true;
@@ -213,24 +225,23 @@ void tu_interrupt_init()
 }
 void in_out1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    OUT1_FLAG = true;
     if (nrf_gpio_pin_read(OUT1_PIN))
     {
-        pir_state = 0;
+        pir_state = 1;
         NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
-        pir_state = 1;
-        NRF_LOG_INFO("CD 1\r\n");
+        pir_state = 0;
+        //NRF_LOG_INFO("CD 1\r\n");
     }
 }
 
 void out1_interrupt_init()
 {
     nrf_drv_gpiote_in_config_t out1_config;
-    out1_config.pull = NRF_GPIO_PIN_PULLUP;
-    // out1_config.pull = NRF_GPIO_PIN_PULLDOWN;
+    //out1_config.pull = NRF_GPIO_PIN_PULLUP;
+    out1_config.pull = NRF_GPIO_PIN_PULLDOWN;
     out1_config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
     out1_config.is_watcher = false;
     out1_config.hi_accuracy = false;
@@ -241,24 +252,23 @@ void out1_interrupt_init()
 }
 void in_out2_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    OUT2_FLAG = true;
     if (nrf_gpio_pin_read(OUT2_PIN))
     {
-        pir_state = 0;
+        pir_state = 1;
         NRF_LOG_INFO("CD 2\r\n");
     }
     else
     {
-        pir_state = 1;
-        NRF_LOG_INFO("CD 2\r\n");
+        pir_state = 0;
+        //NRF_LOG_INFO("CD 2\r\n");
     }
 }
 
 void out2_interrupt_init()
 {
     nrf_drv_gpiote_in_config_t out2_config;
-    out2_config.pull = NRF_GPIO_PIN_PULLUP;
-    // out2_config.pull = NRF_GPIO_PIN_PULLDOWN;
+    // out2_config.pull = NRF_GPIO_PIN_PULLUP;
+    out2_config.pull = NRF_GPIO_PIN_PULLDOWN;
     out2_config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
     out2_config.is_watcher = false;
     out2_config.hi_accuracy = false;
@@ -289,8 +299,7 @@ static void timers_init(void)
                                 APP_TIMER_MODE_REPEATED,
                                 systick_handle);
     APP_ERROR_CHECK(err_code);
-    APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(1), NULL));
-
+    APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(1000), NULL));
 }
 
 static void gap_params_init(void)
@@ -427,6 +436,9 @@ static void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context)
     case BLE_GAP_EVT_CONNECTED:
         NRF_LOG_INFO("Connected");
         m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value);
+
+        check_error_ble(err_code);
         break;
 
     case BLE_GAP_EVT_DISCONNECTED:
@@ -531,29 +543,29 @@ void task_chuyendong()
 {
     ret_code_t err_code;
 
-            if ((sys_tick > PIR_TIMEOUT) && !pir_state)         // ko co gi 
-            {
-                task_state = 2;
-                // NRF_LOG_INFO("task 2");
-            }
-            if ((sys_tick > PIR_TIMEOUT) && pir_state)          // co chuyen dong
-            {
-                task_state = 1;
-                // NRF_LOG_INFO("task 1");
-            }
-            if (task_pre_state != task_state)
-            {
-                err_code = ble_cb_chuyendong_change(m_conn_handle, &m_cb, pir_state);
-                check_error_ble(err_code);
-            }
-            if (pir_state)
-            {
-                sys_tick = 0;
-            }
-            // NRF_LOG_INFO("%d\n", sys_tick);
-            // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_state, task_pre_state, task_state);
-            pir_pre_state = pir_state;
-            task_pre_state = task_state;
+    if ((sys_tick > PIR_TIMEOUT) && !pir_state) // ko co gi
+    {
+        task_state = 2;
+        // NRF_LOG_INFO("task 2");
+    }
+    if ((sys_tick > PIR_TIMEOUT) && pir_state) // co chuyen dong
+    {
+        task_state = 1;
+        // NRF_LOG_INFO("task 1");
+    }
+    if (task_pre_state != task_state)
+    {
+        err_code = ble_cb_chuyendong_change(m_conn_handle, &m_cb, pir_state);
+        check_error_ble(err_code);
+    }
+    if (pir_state)
+    {
+        sys_tick = 0;
+    }
+    // NRF_LOG_INFO("%d\n", sys_tick);
+    // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_state, task_pre_state, task_state);
+    pir_pre_state = pir_state;
+    task_pre_state = task_state;
 }
 static void power_management_init(void)
 {
@@ -564,10 +576,8 @@ static void power_management_init(void)
 
 static void idle_state_handle(void)
 {
-    if (NRF_LOG_PROCESS() == false)
-    {
-        nrf_pwr_mgmt_run();
-    }
+
+    nrf_pwr_mgmt_run();
 }
 void task_adc(void)
 {
@@ -575,7 +585,7 @@ void task_adc(void)
     if (adc_flag)
     {
         nrf_drv_saadc_sample();
-        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pin_8bit_value);
+        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value);
 
         check_error_ble(err_code);
         adc_flag = false;
@@ -588,8 +598,8 @@ int main(void)
     timers_init();
     create_ADC_timer();
     power_management_init();
-    saadc_init();
     interrupt_init();
+    // saadc_init();
     ble_stack_init();
     gap_params_init();
     gatt_init();
@@ -607,7 +617,11 @@ int main(void)
         task_tu();
         task_chuyendong();
         task_adc();
+        //NRF_LOG_FLUSH();
+        
         idle_state_handle();
+
+        
     }
 }
 
