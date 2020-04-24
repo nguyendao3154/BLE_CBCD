@@ -72,7 +72,7 @@
 #define OUT1_PIN 18
 #define OUT2_PIN 13
 
-#define DEVICE_NAME "Test adc"                                 /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME "Sieu Pham"                                 /**< Name of device. Will be included in the advertising data. */
 #define APP_BLE_OBSERVER_PRIO 3                                /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG 1                                 /**< A tag identifying the SoftDevice BLE configuration. */
 #define APP_TIMER_PRESCALER 0                                  /**< Value of the RTC1 PRESCALER register. */
@@ -90,7 +90,7 @@
 
 #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
-#define ADC_TIME_SCAN 100000 // ADC quet 1s 1 lan
+#define ADC_TIME_SCAN 86400000 // ADC quet 1 ngay 1 lan
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
 #define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN1
 
@@ -133,8 +133,9 @@ void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
 {
     if (p_event->type == NRF_DRV_SAADC_EVT_DONE)
     {
-        ret_code_t err_code;
+        adc_flag = true;
 
+        ret_code_t err_code;
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
         APP_ERROR_CHECK(err_code);
         // pin_value = (p_event->data.done.p_buffer[0]) * 12 * 11 / 1024;
@@ -169,10 +170,9 @@ void saadc_init(void)
 
 static void adc_handle_timer(void *p_context)
 {
-    //NRF_LOG_INFO("in timer \n");
-    adc_flag = true;
+
     if (!m_saadc_initialized)
-    {
+    {   
         saadc_init(); //Initialize the SAADC. In the case when SAADC_SAMPLES_IN_BUFFER > 1 then we only need to initialize the SAADC when the the buffer is empty.
     }
     m_saadc_initialized = true;
@@ -280,7 +280,7 @@ void out2_interrupt_init()
 void interrupt_init()
 {
     nrf_drv_gpiote_init();
-    tu_interrupt_init();
+    //tu_interrupt_init();
     out1_interrupt_init();
     out2_interrupt_init();
 }
@@ -582,9 +582,9 @@ static void idle_state_handle(void)
 void task_adc(void)
 {
     ret_code_t err_code;
+    nrf_drv_saadc_sample();
     if (adc_flag)
     {
-        nrf_drv_saadc_sample();
         err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value);
 
         check_error_ble(err_code);
@@ -594,19 +594,22 @@ void task_adc(void)
 int main(void)
 {
     // Initialize.
-    log_init();
+    //log_init();
     timers_init();
     create_ADC_timer();
     power_management_init();
     interrupt_init();
-    // saadc_init();
+    saadc_init();
     ble_stack_init();
     gap_params_init();
     gatt_init();
     services_init();
     advertising_init();
     conn_params_init();
+    nrf_drv_saadc_sample();
     // Start execution.
+    //check_error_ble(ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value));
+    
     NRF_LOG_INFO("Sieu pham started.");
     advertising_start();
 
@@ -614,7 +617,7 @@ int main(void)
     for (;;)
     {
 
-        task_tu();
+        //task_tu();
         task_chuyendong();
         task_adc();
         //NRF_LOG_FLUSH();

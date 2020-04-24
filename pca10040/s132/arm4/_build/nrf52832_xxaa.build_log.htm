@@ -32,12 +32,14 @@ compiling main.c...
   static uint8_t pin_8bit_value;
 ..\..\..\main.c(112): warning:  #177-D: variable "pin_value"  was declared but never referenced
   static uint32_t pin_value;
-..\..\..\main.c: 2 warnings, 0 errors
+..\..\..\main.c(521): warning:  #177-D: function "log_init"  was declared but never referenced
+  static void log_init(void)
+..\..\..\main.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=15404 RO-data=3128 RW-data=140 ZI-data=10268  
+Program Size: Code=11976 RO-data=928 RW-data=124 ZI-data=8868  
 FromELF: creating hex file...
-".\_build\nrf52832_xxaa.axf" - 0 Error(s), 2 Warning(s).
-Build Time Elapsed:  00:00:13
+".\_build\nrf52832_xxaa.axf" - 0 Error(s), 3 Warning(s).
+Build Time Elapsed:  00:00:05
 </pre>
 </body>
 </html>
