@@ -92,7 +92,7 @@
 
 #define ADC_TIME_SCAN 86400000 // ADC quet 1 ngay 1 lan
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
-#define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN1
+#define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN2
 
 #define SAMPLES_IN_BUFFER 1
 
@@ -115,7 +115,7 @@ static bool m_saadc_initialized = false;
 /**@brief Struct that contains pointers to the encoded advertising data. */
 uint32_t sys_tick;
 uint8_t pir_state;
-uint16_t pir_analog_value;
+uint32_t pir_analog_value;
 static ble_gap_adv_data_t m_adv_data =
     {
         .adv_data =
@@ -139,8 +139,9 @@ void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
         APP_ERROR_CHECK(err_code);
         // pin_value = (p_event->data.done.p_buffer[0]) * 12 * 11 / 1024;
-        // pin_8bit_value = (uint8_t)pin_value;
-        pir_analog_value = (p_event->data.done.p_buffer[0]);
+        NRF_LOG_INFO("%d\n",p_event->data.done.p_buffer[0]);
+        pir_analog_value = (p_event->data.done.p_buffer[0])*3/5;  // 
+        pin_8bit_value = (uint8_t)pir_analog_value;
         NRF_LOG_INFO("%d\r\n", pir_analog_value);
         nrf_drv_saadc_uninit();                                                     //Unintialize SAADC to disable EasyDMA and save power
         NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
@@ -151,7 +152,7 @@ void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
 void saadc_init(void)
 {
     ret_code_t err_code;
-    nrf_saadc_channel_config_t channel1_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_PIR_CHANNEL);
+    nrf_saadc_channel_config_t channel1_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
 
     // nrf_saadc_channel_config_t channel2_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
 
@@ -585,7 +586,7 @@ void task_adc(void)
     nrf_drv_saadc_sample();
     if (adc_flag)
     {
-        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value);
+        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pin_8bit_value);
 
         check_error_ble(err_code);
         adc_flag = false;
