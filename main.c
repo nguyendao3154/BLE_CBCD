@@ -90,7 +90,7 @@
 
 #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
-#define ADC_TIME_SCAN 86400000 // ADC quet 1 ngay 1 lan
+#define ADC_TIME_SCAN 3000 // ADC quet 1 ngay 1 lan
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
 #define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN2
 
@@ -137,12 +137,14 @@ void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
 
         ret_code_t err_code;
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
+				APP_ERROR_CHECK(err_code);
+				err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
         APP_ERROR_CHECK(err_code);
         // pin_value = (p_event->data.done.p_buffer[0]) * 12 * 11 / 1024;
-        NRF_LOG_INFO("%d\n",p_event->data.done.p_buffer[0]);
-        pir_analog_value = (p_event->data.done.p_buffer[0])*3/5;  // 
+        //NRF_LOG_INFO("%d\n",p_event->data.done.p_buffer[0]);
+        pir_analog_value = (p_event->data.done.p_buffer[0])*50/205;  // 
         pin_8bit_value = (uint8_t)pir_analog_value;
-        NRF_LOG_INFO("%d\r\n", pir_analog_value);
+        //NRF_LOG_INFO("%d\r\n", pir_analog_value);
         nrf_drv_saadc_uninit();                                                     //Unintialize SAADC to disable EasyDMA and save power
         NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
         NVIC_ClearPendingIRQ(SAADC_IRQn);                                           //Clear the SAADC interrupt if set
@@ -153,13 +155,13 @@ void saadc_init(void)
 {
     ret_code_t err_code;
     nrf_saadc_channel_config_t channel1_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
-
+    channel1_config.gain = NRF_SAADC_GAIN1_2;
     // nrf_saadc_channel_config_t channel2_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
 
     err_code = nrf_drv_saadc_init(NULL, saadc_callback);
     APP_ERROR_CHECK(err_code);
 
-    err_code = nrf_drv_saadc_channel_init(0, &channel1_config);
+    err_code = nrf_drv_saadc_channel_init(2, &channel1_config);
     APP_ERROR_CHECK(err_code);
 
     // err_code = nrf_drv_saadc_channel_init(1, &channel2_config);
@@ -203,12 +205,12 @@ void in_tu_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     if (!nrf_gpio_pin_read(TU_PIN))
     {
         tu_logic_level = 1;
-        NRF_LOG_INFO("Co nam cham\r\n");
+        //NRF_LOG_INFO("Co nam cham\r\n");
     }
     else
     {
         tu_logic_level = 0;
-        NRF_LOG_INFO("Xa nam cham\r\n");
+        //NRF_LOG_INFO("Xa nam cham\r\n");
     }
 }
 
@@ -229,7 +231,7 @@ void in_out1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     if (nrf_gpio_pin_read(OUT1_PIN))
     {
         pir_state = 1;
-        NRF_LOG_INFO("CD 1\r\n");
+        //NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
@@ -256,7 +258,7 @@ void in_out2_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     if (nrf_gpio_pin_read(OUT2_PIN))
     {
         pir_state = 1;
-        NRF_LOG_INFO("CD 2\r\n");
+        //("CD 2\r\n");
     }
     else
     {
@@ -438,7 +440,7 @@ static void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context)
         NRF_LOG_INFO("Connected");
         m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
         err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value);
-
+				check_error_ble(ble_cb_chuyendong_change(m_conn_handle, &m_cb, pir_state));
         check_error_ble(err_code);
         break;
 
@@ -586,7 +588,7 @@ void task_adc(void)
     nrf_drv_saadc_sample();
     if (adc_flag)
     {
-        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pin_8bit_value);
+        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value);
 
         check_error_ble(err_code);
         adc_flag = false;
