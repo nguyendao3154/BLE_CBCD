@@ -11,6 +11,7 @@
 ".\_build\nrf_ble_gatt.o"
 ".\_build\nrf_ble_qwr.o"
 ".\_build\cambien_service.o"
+".\_build\ble_spec.o"
 ".\_build\nrf_drv_clock.o"
 ".\_build\nrf_drv_uart.o"
 ".\_build\nrfx_atomic.o"
