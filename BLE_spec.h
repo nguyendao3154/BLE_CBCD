@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-#define DEVICE_NAME "Test"                                 /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME "CBCD"                                 /**< Name of device. Will be included in the advertising data. */
 #define APP_BLE_OBSERVER_PRIO 3                                /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG 1                                 /**< A tag identifying the SoftDevice BLE configuration. */
 #define APP_TIMER_PRESCALER 0                                  /**< Value of the RTC1 PRESCALER register. */
@@ -53,6 +53,8 @@ extern uint8_t m_adv_handle;                                            /**< Adv
 extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buffer for storing an encoded advertising set. */
 extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
 extern ble_gap_adv_data_t m_adv_data;
+extern uint32_t pir_analog_value;
+extern ble_cb_t m_cb;
 
 void set_BLE_para(void);
 

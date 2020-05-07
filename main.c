@@ -10,8 +10,8 @@
 #define OUT1_PIN 18
 #define OUT2_PIN 13
 
-#define PIR_TIMEOUT 5                                        // PIR timeout 10s
-#define ADC_TIME_SCAN 3000 // ADC quet 1 ngay 1 lan
+#define PIR_TIMEOUT 10                                        // PIR timeout 10s
+#define ADC_TIME_SCAN 100000 // ADC quet 1 ngay 1 lan
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
 #define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN2
 
@@ -22,7 +22,7 @@ static nrf_saadc_value_t m_buffer[SAMPLES_IN_BUFFER];
 APP_TIMER_DEF(m_adc_id);
 APP_TIMER_DEF(timer_systick_id);
 NRF_BLE_GATT_DEF(m_gatt); /**< GATT module instance. */
-BLE_CB_DEF(m_cb);
+ble_cb_t m_cb;
 
 uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**< Handle of the current connection. */
 
@@ -55,7 +55,7 @@ void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
         //NRF_LOG_INFO("%d\n",p_event->data.done.p_buffer[0]);
         pir_analog_value = (p_event->data.done.p_buffer[0])*50/205;  // 
         pin_8bit_value = (uint8_t)pir_analog_value;
-        //NRF_LOG_INFO("%d\r\n", pir_analog_value);
+        NRF_LOG_INFO("%d\r\n", pir_analog_value);
         nrf_drv_saadc_uninit();                                                     //Unintialize SAADC to disable EasyDMA and save power
         NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
         NVIC_ClearPendingIRQ(SAADC_IRQn);                                           //Clear the SAADC interrupt if set
@@ -299,7 +299,7 @@ int main(void)
     // Start execution.
     //check_error_ble(ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value));
     
-    NRF_LOG_INFO("Sieu pham started.");
+    NRF_LOG_INFO("CBCD started.");
     advertising_start();
 
     // Enter main loop.
@@ -307,8 +307,8 @@ int main(void)
     {
 
         //task_tu();
-        //task_chuyendong();
-        //task_adc();
+        task_chuyendong();
+        task_adc();
         NRF_LOG_FLUSH();
         
         idle_state_handle();
