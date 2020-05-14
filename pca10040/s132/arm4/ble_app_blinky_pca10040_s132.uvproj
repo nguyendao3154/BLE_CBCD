@@ -1013,6 +1013,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\BLE_spec.c</FilePath>
             </File>
+            <File>
+              <FileName>app_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\app_adc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4404,6 +4409,11 @@
               <FileName>BLE_spec.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\BLE_spec.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\app_adc.c</FilePath>
             </File>
           </Files>
         </Group>

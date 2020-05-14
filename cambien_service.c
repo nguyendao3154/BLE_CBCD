@@ -9,7 +9,7 @@ void ble_cb_on_ble_evt(ble_evt_t const *p_ble_evt, void *p_contex)
     {
 
     default:
-        // No implementation needed.
+        // No implementation needeble_cb_init_td.
         break;
     }
 }
@@ -90,7 +90,7 @@ uint32_t ble_cb_init(ble_cb_t *p_cb)
 uint32_t ble_cb_tu_change(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t button_state)
 {
     ble_gatts_hvx_params_t params;
-    uint16_t len = sizeof(button_state);
+    uint16_t len = sizeof(button_state);    
 
     memset(&params, 0, sizeof(params));
     params.type = BLE_GATT_HVX_NOTIFICATION;

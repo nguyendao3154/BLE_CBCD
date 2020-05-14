@@ -5,21 +5,13 @@
 #include "BLE_spec.h"
 #include "cambien_service.h"
 #include "nrf_drv_gpiote.h"
-#include "nrf_drv_saadc.h"
+#include "app_adc.h"
+
 #define TU_PIN 3
 #define OUT1_PIN 18
 #define OUT2_PIN 13
 
-#define PIR_TIMEOUT 10                                        // PIR timeout 10s
-#define ADC_TIME_SCAN 100000 // ADC quet 1 ngay 1 lan
-#define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
-#define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN2
-
-#define SAMPLES_IN_BUFFER 1
-
-static nrf_saadc_value_t m_buffer[SAMPLES_IN_BUFFER];
-
-APP_TIMER_DEF(m_adc_id);
+#define PIR_TIMEOUT 10       // PIR timeout 10sadc_flag
 APP_TIMER_DEF(timer_systick_id);
 NRF_BLE_GATT_DEF(m_gatt); /**< GATT module instance. */
 ble_cb_t m_cb;
@@ -30,79 +22,11 @@ uint8_t m_adv_handle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;           /**< Advertisin
 uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buffer for storing an encoded advertising set. */
 uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
 
-static uint8_t pin_8bit_value;
-static uint32_t pin_value;
-bool adc_flag = false;
-static bool m_saadc_initialized = false;
+
 /**@brief Struct that contains pointers to the encoded advertising data. */
 uint32_t sys_tick;
 uint8_t pir_state;
-uint32_t pir_analog_value;
 ble_gap_adv_data_t m_adv_data;
-
-void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
-{
-    if (p_event->type == NRF_DRV_SAADC_EVT_DONE)
-    {
-        adc_flag = true;
-
-        ret_code_t err_code;
-        err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
-				APP_ERROR_CHECK(err_code);
-				err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
-        APP_ERROR_CHECK(err_code);
-        // pin_value = (p_event->data.done.p_buffer[0]) * 12 * 11 / 1024;
-        //NRF_LOG_INFO("%d\n",p_event->data.done.p_buffer[0]);
-        pir_analog_value = (p_event->data.done.p_buffer[0])*50/205;  // 
-        pin_8bit_value = (uint8_t)pir_analog_value;
-        NRF_LOG_INFO("%d\r\n", pir_analog_value);
-        nrf_drv_saadc_uninit();                                                     //Unintialize SAADC to disable EasyDMA and save power
-        NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
-        NVIC_ClearPendingIRQ(SAADC_IRQn);                                           //Clear the SAADC interrupt if set
-        m_saadc_initialized = false;
-    }
-}
-void saadc_init(void)
-{
-    ret_code_t err_code;
-    nrf_saadc_channel_config_t channel1_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
-    channel1_config.gain = NRF_SAADC_GAIN1_2;
-    // nrf_saadc_channel_config_t channel2_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
-
-    err_code = nrf_drv_saadc_init(NULL, saadc_callback);
-    APP_ERROR_CHECK(err_code);
-
-    err_code = nrf_drv_saadc_channel_init(2, &channel1_config);
-    APP_ERROR_CHECK(err_code);
-
-    // err_code = nrf_drv_saadc_channel_init(1, &channel2_config);
-    APP_ERROR_CHECK(err_code);
-
-    err_code = nrf_drv_saadc_buffer_convert(m_buffer, SAMPLES_IN_BUFFER);
-    APP_ERROR_CHECK(err_code);
-}
-
-static void adc_handle_timer(void *p_context)
-{
-
-    if (!m_saadc_initialized)
-    {   
-        saadc_init(); //Initialize the SAADC. In the case when SAADC_SAMPLES_IN_BUFFER > 1 then we only need to initialize the SAADC when the the buffer is empty.
-    }
-    m_saadc_initialized = true;
-}
-
-static void create_ADC_timer()
-{
-    ret_code_t err_code;
-    // Create timers
-    err_code = app_timer_create(&m_adc_id,
-                                APP_TIMER_MODE_REPEATED,
-                                adc_handle_timer);
-    APP_ERROR_CHECK(err_code);
-    APP_ERROR_CHECK(app_timer_start(m_adc_id, APP_TIMER_TICKS(ADC_TIME_SCAN), NULL));
-}
-
 
 bool TU_FLAG = false;
 uint8_t tu_logic_level;
@@ -212,7 +136,6 @@ static void timers_init(void)
     APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(1000), NULL));
 }
 
-
 void task_tu()
 {
     ret_code_t err_code;
@@ -271,12 +194,12 @@ void task_adc(void)
 {
     ret_code_t err_code;
     nrf_drv_saadc_sample();
-    if (adc_flag)
+    if (check_status())
     {
-        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value);
+        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, get_adc_value());
 
         check_error_ble(err_code);
-        adc_flag = false;
+        turn_off_saadc_driver();   
     }
 }
 int main(void)
@@ -297,8 +220,8 @@ int main(void)
     conn_params_init();
     nrf_drv_saadc_sample();
     // Start execution.
-    //check_error_ble(ble_cb_ADC_change(m_conn_handle, &m_cb, pir_analog_value));
-    
+    //check_error_ble(ble_cb_ADC_change(m_conn_handle, &m_cb, get_adc_value()));
+
     NRF_LOG_INFO("CBCD started.");
     advertising_start();
 
@@ -310,10 +233,8 @@ int main(void)
         task_chuyendong();
         task_adc();
         NRF_LOG_FLUSH();
-        
-        idle_state_handle();
 
-        
+        idle_state_handle();
     }
 }
 

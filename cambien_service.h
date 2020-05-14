@@ -29,22 +29,13 @@ NRF_SDH_BLE_OBSERVER(_name ## _obs,                                             
 
 typedef struct ble_cb_s ble_cb_t;
 
-typedef void (*ble_cb_led_write_handler_t) (uint16_t conn_handle, ble_cb_t * p_cb, uint8_t new_state);
-
-/** @brief LED Button Service init structure. This structure contains all options and data needed for
- *        initialization of the service.*/
-typedef struct  
-{
-    ble_cb_led_write_handler_t led_write_handler; /**< Event handler to be called when the LED Characteristic is written. */
-} ble_cb_init_t;
-
 struct ble_cb_s
 {
-    uint16_t                    service_handle;      /**< Handle of LED Button Service (as provided by the BLE stack). */
-    ble_gatts_char_handles_t    tu_char_handles;    /**< Handles related to the LED Characteristic. */
-    ble_gatts_char_handles_t    chuyendong_char_handles; /**< Handles related to the Button Characteristic. */
+    uint16_t                    service_handle;      
+    ble_gatts_char_handles_t    tu_char_handles;   
+    ble_gatts_char_handles_t    chuyendong_char_handles; 
     ble_gatts_char_handles_t    ADC_char_handles;
-    uint8_t                     uuid_type;           /**< UUID type for the LED Button Service. */
+    uint8_t                     uuid_type;           
 };
 
 uint32_t ble_cb_init(ble_cb_t * p_cb);
