@@ -24,6 +24,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "cambien_service.h"
+#include "app_adc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,7 +54,6 @@ extern uint8_t m_adv_handle;                                            /**< Adv
 extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buffer for storing an encoded advertising set. */
 extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
 extern ble_gap_adv_data_t m_adv_data;
-extern uint32_t pir_analog_value;
 extern ble_cb_t m_cb;
 
 void set_BLE_para(void);

@@ -6,13 +6,12 @@ void turn_off_saadc_driver(void)
     NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
     NVIC_ClearPendingIRQ(SAADC_IRQn);
     m_saadc_initialized = false;
-    adc_flag = true;
 }
 void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
 {
     if (p_event->type == NRF_DRV_SAADC_EVT_DONE)
     {
-        ret_code_t err_code;
+        ret_code_t err_code; 
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
         APP_ERROR_CHECK(err_code);
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
@@ -73,6 +72,6 @@ void create_ADC_timer(void)
 
 bool check_status(void)
 {
-    return adc_flag;
+    return m_saadc_initialized;
 }
 

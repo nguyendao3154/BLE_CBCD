@@ -20,9 +20,7 @@
 APP_TIMER_DEF(m_adc_id);
 static nrf_saadc_value_t m_buffer[SAMPLES_IN_BUFFER];
 static uint8_t pin_8bit_value;
-static uint32_t pin_value;
 static uint32_t pir_analog_value;
-bool adc_flag = false;
 static bool m_saadc_initialized = false;
 
 void turn_off_saadc_driver(void);
