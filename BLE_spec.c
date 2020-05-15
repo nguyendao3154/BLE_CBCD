@@ -1,5 +1,7 @@
 #include "BLE_spec.h"
 
+extern volatile uint8_t pin_8bit_value;
+
 void assert_nrf_callback(uint16_t line_num, const uint8_t *p_file_name)
 {
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
@@ -141,7 +143,7 @@ void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context)
         NRF_LOG_INFO("Connected");
         m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
 
-        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, get_adc_value());
+        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pin_8bit_value);
 
         check_error_ble(err_code);
 

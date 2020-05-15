@@ -1,7 +1,22 @@
 #include "app_adc.h"
 
+#define SAMPLES_IN_BUFFER 1
+#define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
+#define BAT_NUMBER_CHANNEL 2
+#define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN2
+#define ADC_TIME_SCAN 5000 // ADC quet 1 ngay 1 lan
+
+extern bool m_saadc_initialized;
+extern volatile uint8_t pin_8bit_value;
+
+APP_TIMER_DEF(m_adc_id);
+static nrf_saadc_value_t m_buffer[SAMPLES_IN_BUFFER];
+static uint32_t pir_analog_value;
+
+
 void turn_off_saadc_driver(void)
 {
+    // NRF_LOG_INFO("Off");
     nrf_drv_saadc_uninit();                                                     //Unintialize SAADC to disable EasyDMA and save power
     NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
     NVIC_ClearPendingIRQ(SAADC_IRQn);
@@ -27,6 +42,7 @@ void saadc_callback(nrf_drv_saadc_evt_t const *p_event)
 }
 void saadc_init(void)
 {
+    // NRF_LOG_INFO("init");
     ret_code_t err_code;
     nrf_saadc_channel_config_t channel1_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
     channel1_config.gain = NRF_SAADC_GAIN1_2;
@@ -43,20 +59,17 @@ void saadc_init(void)
 
     err_code = nrf_drv_saadc_buffer_convert(m_buffer, SAMPLES_IN_BUFFER);
     APP_ERROR_CHECK(err_code);
-}
-uint8_t get_adc_value()
-{
-    return pin_8bit_value;
+    m_saadc_initialized = true;
 }
 
 void adc_handle_timer(void *p_context)
 {
-
+    // NRF_LOG_INFO("handle");
     if (!m_saadc_initialized)
     {
         saadc_init(); //Initialize the SAADC. In the case when SAADC_SAMPLES_IN_BUFFER > 1 then we only need to initialize the SAADC when the the buffer is empty.
     }
-    m_saadc_initialized = true;
+    // m_saadc_initialized = true;
 }
 
 void create_ADC_timer(void)
@@ -68,10 +81,5 @@ void create_ADC_timer(void)
                                 adc_handle_timer);
     APP_ERROR_CHECK(err_code);
     APP_ERROR_CHECK(app_timer_start(m_adc_id, APP_TIMER_TICKS(ADC_TIME_SCAN), NULL));
-}
-
-bool check_status(void)
-{
-    return m_saadc_initialized;
 }
 
