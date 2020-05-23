@@ -25,12 +25,14 @@
 #include "nrf_log_default_backends.h"
 #include "cambien_service.h"
 #include "app_adc.h"
-
+#include "ble_dis_c.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define DEVICE_NAME "CBCD"                                 /**< Name of device. Will be included in the advertising data. */
+#define MODEL_NUMBER "MKP_PIR_0001"
+#define MANUFACTURER_NAME                "Makihome" 
 #define APP_BLE_OBSERVER_PRIO 3                                /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG 1                                 /**< A tag identifying the SoftDevice BLE configuration. */
 #define APP_TIMER_PRESCALER 0                                  /**< Value of the RTC1 PRESCALER register. */

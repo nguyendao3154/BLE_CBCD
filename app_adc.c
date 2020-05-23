@@ -3,8 +3,8 @@
 #define SAMPLES_IN_BUFFER 1
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
 #define BAT_NUMBER_CHANNEL 2
-#define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN2
-#define ADC_TIME_SCAN 5000 // ADC quet 1 ngay 1 lan
+#define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN3
+#define ADC_TIME_SCAN 86400000 // ADC quet 1 ngay 1 lan
 
 extern bool m_saadc_initialized;
 extern volatile uint8_t pin_8bit_value;

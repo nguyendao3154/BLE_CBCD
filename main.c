@@ -8,8 +8,8 @@
 #include "app_adc.h"
 
 #define TU_PIN 3
-#define OUT1_PIN 18
-#define OUT2_PIN 13
+#define OUT1_PIN 9
+#define OUT2_PIN 10
 
 #define PIR_TIMEOUT 10       // PIR timeout 10sadc_flag
 APP_TIMER_DEF(timer_systick_id);
@@ -65,12 +65,12 @@ void in_out1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     if (nrf_gpio_pin_read(OUT1_PIN))
     {
         pir_state = 1;
-        //NRF_LOG_INFO("CD 1\r\n");
+        NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
         pir_state = 0;
-        //NRF_LOG_INFO("CD 1\r\n");
+        NRF_LOG_INFO("CD 0\r\n");
     }
 }
 
@@ -92,12 +92,12 @@ void in_out2_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     if (nrf_gpio_pin_read(OUT2_PIN))
     {
         pir_state = 1;
-        //("CD 2\r\n");
+        NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
         pir_state = 0;
-        //NRF_LOG_INFO("CD 2\r\n");
+        NRF_LOG_INFO("CD 0\r\n");
     }
 }
 
@@ -160,12 +160,12 @@ void task_chuyendong()
     if ((sys_tick > PIR_TIMEOUT) && !pir_state) // ko co gi
     {
         task_state = 2;
-        // NRF_LOG_INFO("task 2");
+         NRF_LOG_INFO("task 2");
     }
     if ((sys_tick > PIR_TIMEOUT) && pir_state) // co chuyen dong
     {
         task_state = 1;
-        // NRF_LOG_INFO("task 1");
+         NRF_LOG_INFO("task 1");
     }
     if (task_pre_state != task_state)
     {
@@ -176,7 +176,7 @@ void task_chuyendong()
     {
         sys_tick = 0;
     }
-    // NRF_LOG_INFO("%d\n", sys_tick);
+     //NRF_LOG_INFO("%d\n", sys_tick);
     // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_state, task_pre_state, task_state);
     pir_pre_state = pir_state;
     task_pre_state = task_state;
@@ -212,7 +212,7 @@ int main(void)
 {
     // Initialize.
     set_BLE_para();
-    log_init();
+    //log_init();
     timers_init();
     create_ADC_timer();
     power_management_init();
@@ -236,9 +236,9 @@ int main(void)
     {
 
         //task_tu();
-        task_chuyendong();
+        task_chuyendong(); 
         task_adc();
-        NRF_LOG_FLUSH();
+        //NRF_LOG_FLUSH();
 
         idle_state_handle();
     }

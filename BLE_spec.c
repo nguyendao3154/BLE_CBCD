@@ -1,6 +1,7 @@
 #include "BLE_spec.h"
 
 extern volatile uint8_t pin_8bit_value;
+extern uint8_t pir_state;
 
 void assert_nrf_callback(uint16_t line_num, const uint8_t *p_file_name)
 {
@@ -41,8 +42,19 @@ void gatt_init(nrf_ble_gatt_t *p_gatt)
 void services_init(ble_cb_t *p_cb)
 {
     uint32_t err_code;
-
+		ble_dis_init_t dis_init;
     err_code = ble_cb_init(p_cb);
+    APP_ERROR_CHECK(err_code);
+	
+		memset(&dis_init, 0, sizeof(dis_init));
+
+    ble_srv_ascii_to_utf8(&dis_init.manufact_name_str, (char*) MANUFACTURER_NAME);
+		
+		ble_srv_ascii_to_utf8(&dis_init.model_num_str, (char*) MODEL_NUMBER);
+	
+    dis_init.dis_char_rd_sec = SEC_OPEN;
+		
+		err_code = ble_dis_init(&dis_init);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -144,6 +156,10 @@ void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context)
         m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
 
         err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pin_8bit_value);
+
+        check_error_ble(err_code);
+		
+				err_code = ble_cb_chuyendong_change(m_conn_handle, &m_cb, pir_state);
 
         check_error_ble(err_code);
 
