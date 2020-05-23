@@ -7,7 +7,7 @@
 #include "nrf_drv_gpiote.h"
 #include "app_adc.h"
 
-#define TU_PIN 3
+#define TU_PIN 25
 #define OUT1_PIN 9
 #define OUT2_PIN 10
 
@@ -117,9 +117,9 @@ void out2_interrupt_init()
 void interrupt_init()
 {
     nrf_drv_gpiote_init();
-    //tu_interrupt_init();
-    out1_interrupt_init();
-    out2_interrupt_init();
+    tu_interrupt_init();
+    //out1_interrupt_init();
+    //out2_interrupt_init();
 }
 void systick_handle(void *p_context)
 {
@@ -235,8 +235,8 @@ int main(void)
     for (;;)
     {
 
-        //task_tu();
-        task_chuyendong(); 
+        task_tu();
+        //task_chuyendong(); 
         task_adc();
         //NRF_LOG_FLUSH();
 

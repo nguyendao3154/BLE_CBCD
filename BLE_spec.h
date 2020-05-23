@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#define DEVICE_NAME "CBCD"                                 /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME "Door"                                 /**< Name of device. Will be included in the advertising data. */
 #define MODEL_NUMBER "MKP_PIR_0001"
 #define MANUFACTURER_NAME                "Makihome" 
 #define APP_BLE_OBSERVER_PRIO 3                                /**< Application's BLE observer priority. You shouldn't need to modify this value. */
