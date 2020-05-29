@@ -5,6 +5,7 @@
 ".\_build\app_adc.o"
 ".\_build\ble_spec.o"
 ".\_build\cambien_service.o"
+".\_build\app_interrupt.o"
 ".\_build\boards.o"
 ".\_build\utf.o"
 ".\_build\ble_advdata.o"

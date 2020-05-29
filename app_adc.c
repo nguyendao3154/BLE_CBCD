@@ -1,3 +1,22 @@
+/**
+ ******************************************************************************
+ * @file    app_adc.c
+ * @author  Makipos Co.,LTD.
+ * @version 1.0
+ * @date    May 28, 2020
+ * @brief   
+ * @history
+ * 
+ *                      Revision History                                      *
+ ****************************
+ * Revision     Date            By              Description                         *
+ ****************************
+ * 1.0.0        28-May-2020     Nguyen Dao          create                                *
+
+ ******************************************************************************/
+/*******************************************************************************
+ * Include
+ ******************************************************************************/
 #include "app_adc.h"
 
 #define SAMPLES_IN_BUFFER 1
@@ -8,6 +27,10 @@
 
 extern bool m_saadc_initialized;
 extern volatile uint8_t pin_8bit_value;
+extern uint16_t m_conn_handle; /**< Handle of the current connection. */
+extern uint8_t m_adv_handle;           /**< Advertising handle used to identify an advertising set. */
+extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buffer for storing an encoded advertising set. */
+extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
 
 APP_TIMER_DEF(m_adc_id);
 static nrf_saadc_value_t m_buffer[SAMPLES_IN_BUFFER];
@@ -83,3 +106,18 @@ void create_ADC_timer(void)
     APP_ERROR_CHECK(app_timer_start(m_adc_id, APP_TIMER_TICKS(ADC_TIME_SCAN), NULL));
 }
 
+void task_adc(void)
+{
+    ret_code_t err_code;
+    nrf_drv_saadc_sample();
+    // check_status(adc_ready);
+    if (m_saadc_initialized)
+    {
+        // NRF_LOG_INFO("abc");
+        err_code = ble_cb_ADC_change(m_conn_handle, &m_cb, pin_8bit_value);
+        // NRF_LOG_INFO("ab");
+        check_error_ble(err_code);
+        // NRF_LOG_INFO("abc");
+        turn_off_saadc_driver();   
+    }
+}

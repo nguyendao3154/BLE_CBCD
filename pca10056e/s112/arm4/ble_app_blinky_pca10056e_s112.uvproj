@@ -550,6 +550,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\cambien_service.c</FilePath>
             </File>
+            <File>
+              <FileName>app_interrupt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\app_interrupt.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4007,6 +4012,11 @@
               <FileName>cambien_service.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\cambien_service.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_interrupt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\app_interrupt.c</FilePath>
             </File>
           </Files>
         </Group>

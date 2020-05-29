@@ -529,19 +529,21 @@ l\utf_converter -I..\..\..\..\..\..\integration\nrfx -I..\..\..\..\..\..\integr
 ation\nrfx\legacy -I..\..\..\..\..\..\modules\nrfx -I..\..\..\..\..\..\modules\
 nrfx\drivers\include -I..\..\..\..\..\..\modules\nrfx\hal -I..\..\..\..\..\..\m
 odules\nrfx\mdk -I..\config -I../../../../../../components/toolchain/CMSIS/Incl
-ude -I..\..\..\..\ble_app_CBCD -IC:\Keil_v5\ARM\RV31\INC -IC:\Keil_v5\ARM\CMSIS
-\Include --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 52
-9" --predefine="APP_TIMER_V2 SETA 1" --predefine="APP_TIMER_V2_RTC1_ENABLED SET
-A 1" --predefine="BOARD_PCA10040 SETA 1" --predefine="CONFIG_GPIO_AS_PINRESET S
-ETA 1" --predefine="FLOAT_ABI_HARD SETA 1" --predefine="NRF52 SETA 1" --predefi
-ne="NRF52832_XXAA SETA 1" --predefine="NRF52_PAN_74 SETA 1" --predefine="NRF_SD
-_BLE_API_VERSION SETA 7" --predefine="S132 SETA 1" --predefine="SOFTDEVICE_PRES
-ENT SETA 1" --predefine="__HEAP_SIZE SETA 8192" --predefine="__STACK_SIZE SETA 
-8192" --cpreproc_opts=-DAPP_TIMER_V2,-DAPP_TIMER_V2_RTC1_ENABLED,-DBOARD_PCA100
-40,-DCONFIG_GPIO_AS_PINRESET,-DFLOAT_ABI_HARD,-DNRF52,-DNRF52832_XXAA,-DNRF52_P
-AN_74,-DNRF_SD_BLE_API_VERSION=7,-DS132,-DSOFTDEVICE_PRESENT,-D__HEAP_SIZE=8192
-,-D__STACK_SIZE=8192 --list=.\_build\arm_startup_nrf52.lst ..\..\..\..\..\..\mo
-dules\nrfx\mdk\arm_startup_nrf52.s
+ude -I..\..\..\..\ble_app_CBCD -I..\..\..\..\..\..\components\ble\ble_services\
+ble_dis_c -I..\..\..\..\..\..\components\ble\ble_db_discovery -I..\..\..\..\..\
+..\components\ble\nrf_ble_gq -IC:\Keil_v5\ARM\RV31\INC -IC:\Keil_v5\ARM\CMSIS\I
+nclude --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 529"
+ --predefine="APP_TIMER_V2 SETA 1" --predefine="APP_TIMER_V2_RTC1_ENABLED SETA 
+1" --predefine="BOARD_PCA10040 SETA 1" --predefine="CONFIG_GPIO_AS_PINRESET SET
+A 1" --predefine="FLOAT_ABI_HARD SETA 1" --predefine="NRF52 SETA 1" --predefine
+="NRF52832_XXAA SETA 1" --predefine="NRF52_PAN_74 SETA 1" --predefine="NRF_SD_B
+LE_API_VERSION SETA 7" --predefine="S132 SETA 1" --predefine="SOFTDEVICE_PRESEN
+T SETA 1" --predefine="__HEAP_SIZE SETA 8192" --predefine="__STACK_SIZE SETA 81
+92" --cpreproc_opts=-DAPP_TIMER_V2,-DAPP_TIMER_V2_RTC1_ENABLED,-DBOARD_PCA10040
+,-DCONFIG_GPIO_AS_PINRESET,-DFLOAT_ABI_HARD,-DNRF52,-DNRF52832_XXAA,-DNRF52_PAN
+_74,-DNRF_SD_BLE_API_VERSION=7,-DS132,-DSOFTDEVICE_PRESENT,-D__HEAP_SIZE=8192,-
+D__STACK_SIZE=8192 --list=.\_build\arm_startup_nrf52.lst ..\..\..\..\..\..\modu
+les\nrfx\mdk\arm_startup_nrf52.s
 
 
 

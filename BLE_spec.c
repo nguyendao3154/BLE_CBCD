@@ -1,7 +1,27 @@
+/**
+ ******************************************************************************
+ * @file    BLE_spec.c
+ * @author  Makipos Co.,LTD.
+ * @version 1.0
+ * @date    May 28, 2020
+ * @brief   
+ * @history
+ * 
+ *                      Revision History                                      *
+ ****************************
+ * Revision     Date            By              Description                         *
+ ****************************
+ * 1.0.0        28-May-2020     Nguyen Dao          create                                *
+
+ ******************************************************************************/
+/*******************************************************************************
+ * Include
+ ******************************************************************************/
 #include "BLE_spec.h"
 
 extern volatile uint8_t pin_8bit_value;
 extern uint8_t pir_state;
+extern uint8_t tu_logic_level;
 
 void assert_nrf_callback(uint16_t line_num, const uint8_t *p_file_name)
 {
@@ -159,7 +179,11 @@ void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context)
 
         check_error_ble(err_code);
 		
-				err_code = ble_cb_chuyendong_change(m_conn_handle, &m_cb, pir_state);
+		err_code = ble_cb_chuyendong_change(m_conn_handle, &m_cb, pir_state);
+
+        check_error_ble(err_code);
+
+        err_code = ble_cb_tu_change(m_conn_handle, &m_cb, tu_logic_level);
 
         check_error_ble(err_code);
 
