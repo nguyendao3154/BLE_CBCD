@@ -8,8 +8,8 @@
  * @history
  ******************************************************************************/
 
-#ifndef APP_INTERRUPT_H
-#define APP_INTERRUPT_H
+#ifndef APP_SENSOR_H
+#define APP_SENSOR_H
 
 #include <stdint.h>
 #include <string.h>
@@ -23,35 +23,41 @@
 #include "app_timer.h"
 #include "BLE_spec.h"
 
-#define TU_PIN 13
-#define OUT1_PIN 14
-#define OUT2_PIN 15
+#define MAGNETIC_PIN 25
+#define PIR_OUT1_PIN 10
+#define PIR_OUT2_PIN 9
 
-#define PIR_TIMEOUT 10       
+#define PIR_TIMEOUT 10
 
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-void in_tu_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
+void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
-void tu_interrupt_init(void);
+void SENSOR_MagneticInit(void);
 
-void in_out1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
+void SENSOR_PIR_Out1Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
-void out1_interrupt_init(void);
+void SENSOR_PIR_OUT1Init(void);
 
-void in_out2_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
+void SENSOR_PIR_Out2Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
-void out2_interrupt_init(void);
+void SENSOR_PIR_OUT2Init(void);
 
-void interrupt_init(void);
+void SENSOR_InterruptInit(void);
 
-void task_tu(void);
+void SENSOR_MagneticTask(void);
 
-void task_chuyendong(void);
+void SENSOR_PIR_Task(void);
 
-void create_sensor_timer(void);
+void SENSOR_CreateTimer(void);
 
-#endif /* APP_INTERRUPT_H */
+void SENSOR_TickCount(void *p_context);
+
+#endif /* APP_SENSOR_H */
+
+/**
+ * @}
+ */

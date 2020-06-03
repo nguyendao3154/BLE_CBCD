@@ -21,15 +21,19 @@
 #include "app_timer.h"
 #include "BLE_spec.h"
 
-void turn_off_saadc_driver(void);
+void ADC_DeinitDriver(void);
 
-void saadc_callback(nrf_drv_saadc_evt_t const *p_event);
+void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event);
 
-void saadc_init(void);
+void ADC_Init(void);
 
-void create_ADC_timer(void);
+void ADC_CreateTimer(void);
 
-void adc_handle_timer(void *p_context);
+void ADC_HandleTimer(void *p_context);
 
-void task_adc(void);
+void ADC_Task(void);
 #endif
+
+/**
+ * @}
+ */

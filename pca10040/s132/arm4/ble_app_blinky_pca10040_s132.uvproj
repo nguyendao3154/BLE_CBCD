@@ -1024,9 +1024,9 @@
               <FilePath>..\..\..\..\..\..\components\ble\ble_services\ble_dis\ble_dis.c</FilePath>
             </File>
             <File>
-              <FileName>app_interrupt.c</FileName>
+              <FileName>app_sensor.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_interrupt.c</FilePath>
+              <FilePath>..\..\..\app_sensor.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4431,9 +4431,9 @@
               <FilePath>..\..\..\..\..\..\components\ble\ble_services\ble_dis\ble_dis.c</FilePath>
             </File>
             <File>
-              <FileName>app_interrupt.c</FileName>
+              <FileName>app_sensor.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\app_interrupt.c</FilePath>
+              <FilePath>..\..\..\app_sensor.c</FilePath>
             </File>
           </Files>
         </Group>
