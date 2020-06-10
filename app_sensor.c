@@ -25,18 +25,18 @@ extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buf
 extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
 extern ble_cb_t m_cb;
 
-uint8_t pir_state;
+uint8_t volatile pir_state;
 uint8_t pir_pre_state = 0, task_state = 0, task_pre_state = 0;
-uint8_t magnetic_logic_level;
-bool MAGNETIC_FLAG = false;
+uint8_t volatile magnetic_logic_level;
+bool magnetic_flag = false;
 uint8_t numof1000ticks;
 APP_TIMER_DEF(timer_systick_id);
-
+    
 void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
-{
-    MAGNETIC_FLAG = true;
+{   
+    magnetic_flag = true;
     if (!nrf_gpio_pin_read(MAGNETIC_PIN))
-    {
+    {    
         magnetic_logic_level = 1;
         NRF_LOG_INFO("Co nam cham\r\n");
     }
@@ -46,7 +46,7 @@ void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
         //NRF_LOG_INFO("Xa nam cham\r\n");
     }
 }
-
+    
 void SENSOR_MagneticInit(void)
 {
     nrf_drv_gpiote_in_config_t magnetic_config;
@@ -72,7 +72,7 @@ void SENSOR_PIR_Out1Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
         NRF_LOG_INFO("CD 0\r\n");
     }
 }
-
+    
 void SENSOR_PIR_OUT1Init(void)
 {
     nrf_drv_gpiote_in_config_t out1_config;
@@ -123,19 +123,19 @@ void SENSOR_InterruptInit(void)
 void SENSOR_MagneticTask(void)
 {
     ret_code_t err_code;
-    if (MAGNETIC_FLAG)
+    if (magnetic_flag)
     {
         err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, magnetic_logic_level);
 
         BLECB_CheckError(err_code);
-        MAGNETIC_FLAG = false;
+        magnetic_flag = false;
     }
 }
 void SENSOR_PIR_Task(void)
 {
     ret_code_t err_code;
 
-    if ((numof1000ticks > PIR_TIMEOUT) && !pir_state) // ko co gi
+    if ((numof1000ticks > PIR_TIMEOUT) && !pir_state) // ko co chuyen dong trong PIR_TIMEOUT giay
     {
         task_state = 2;
         NRF_LOG_INFO("task 2");

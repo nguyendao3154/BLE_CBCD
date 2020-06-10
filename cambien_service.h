@@ -35,7 +35,7 @@ extern "C"
             0x00, 0x10, 0x00, 0x00, 0x34, 0x12, 0x00, 0x00 \
     }
 #define CB_UUID_SERVICE 0x1234
-#define Cb_UUID_MAGNETIC_CHAR 0x1235
+#define CB_UUID_MAGNETIC_CHAR 0x1235
 #define CB_UUID_PIR_CHAR 0x1236
 #define CB_UUID_ADC_CHAR 0x1238
 

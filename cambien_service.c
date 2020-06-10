@@ -61,7 +61,7 @@ uint32_t BLECB_Init(ble_cb_t *p_cb)
 
     // Add magnetic characteristic.
     memset(&add_char_params, 0, sizeof(add_char_params));
-    add_char_params.uuid = Cb_UUID_MAGNETIC_CHAR;
+    add_char_params.uuid = CB_UUID_MAGNETIC_CHAR;
     add_char_params.uuid_type = p_cb->uuid_type;
     add_char_params.init_len = sizeof(uint8_t);
     add_char_params.max_len = sizeof(uint8_t);

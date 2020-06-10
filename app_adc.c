@@ -25,7 +25,10 @@
 #define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN3
 #define ADC_TIME_SCAN 5000 // ADC quet 1 ngay 1 lan
 
-bool isADCInitialized;
+#define ADC_RESOLUTION 1024
+#define TEN_TIMES_V_REF 6
+#define HUNDRED_TIMES_ADC_GAIN_HARDWARE 18
+bool is_ADC_initialized;
 volatile uint8_t u8pinvalue;
 extern uint16_t m_conn_handle;                                          /**< Handle of the current connection. */
 extern uint8_t m_adv_handle;                                            /**< Advertising handle used to identify an advertising set. */
@@ -46,7 +49,7 @@ void ADC_DeinitDriver(void)
     nrf_drv_saadc_uninit();                                                     //Unintialize SAADC to disable EasyDMA and save power
     NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
     NVIC_ClearPendingIRQ(SAADC_IRQn);
-    isADCInitialized = false;
+    is_ADC_initialized = false;
 }
 
 void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
@@ -65,7 +68,7 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
          * Battery 3V
          * Gain 0.18
          */
-        u32PinValue = (p_event->data.done.p_buffer[0])*6*100/18/1024 ; 
+        u32PinValue = (p_event->data.done.p_buffer[0])*TEN_TIMES_V_REF*100/HUNDRED_TIMES_ADC_GAIN_HARDWARE/ADC_RESOLUTION; 
         u8pinvalue = (uint8_t)u32PinValue;
         NRF_LOG_INFO("%d\r\n", u32PinValue);
         //Clear the SAADC interrupt if set
@@ -90,18 +93,24 @@ void ADC_Init(void)
 
     err_code = nrf_drv_saadc_buffer_convert(m_buffer, SAMPLES_IN_BUFFER);
     APP_ERROR_CHECK(err_code);
-    isADCInitialized = true;
+    is_ADC_initialized = true;
 }
-
+/**
+ * @brief bat ADC bang timer
+ */
 void ADC_HandleTimer(void *p_context)
 {
     // NRF_LOG_INFO("handle");
-    if (!isADCInitialized)
+    if (!is_ADC_initialized)
     {
         ADC_Init(); //Initialize the SAADC. In the case when SAADC_SAMPLES_IN_BUFFER > 1 then we only need to initialize the SAADC when the the buffer is empty.
     }
 }
-
+/**
+ * @brief tao timer
+ * ADC_TIME_SCAN: thoi gian giua moi lan ngat
+ * ADC_HandleTimer: ham callback timer
+ */
 void ADC_CreateTimer(void)
 {
     ret_code_t err_code;
@@ -117,11 +126,11 @@ void ADC_Task(void)
 {
     ret_code_t err_code;
     nrf_drv_saadc_sample();
-    if (isADCInitialized)
+    if (is_ADC_initialized)
     {
         err_code = BLECB_ADCChange(m_conn_handle, &m_cb, u8pinvalue);
         BLECB_CheckError(err_code);
-        ADC_DeinitDriver();
+        ADC_DeinitDriver();                              // gui xong du lieu ADC, tat ADC driver de tiet kiem nang luong
     }
 }
 

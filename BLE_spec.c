@@ -39,8 +39,8 @@ ble_gap_adv_data_t m_adv_data =
             
 extern ble_cb_t m_cb;
 extern volatile uint8_t u8pinvalue;
-extern uint8_t pir_state;
-extern uint8_t magnetic_logic_level;
+extern volatile uint8_t pir_state;
+extern volatile uint8_t magnetic_logic_level;
 
 void BLE_GapParamsInit(void)
 {
