@@ -23,9 +23,9 @@
 #include "app_timer.h"
 #include "BLE_spec.h"
 
-#define MAGNETIC_PIN 13
-#define PIR_OUT1_PIN 14
-#define PIR_OUT2_PIN 15
+#define MAGNETIC_PIN 25
+#define PIR_OUT1_PIN 9
+#define PIR_OUT2_PIN 10
 
 #define PIR_TIMEOUT 100         // 10s
 #define DOOR_MINIMUM_INTERVAL 5     // 0.5s

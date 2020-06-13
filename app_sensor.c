@@ -80,8 +80,8 @@ void SENSOR_PIR_Out1Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 void SENSOR_PIR_OUT1Init(void)
 {
     nrf_drv_gpiote_in_config_t out1_config;
-    out1_config.pull = NRF_GPIO_PIN_PULLUP;
-    // out1_config.pull = NRF_GPIO_PIN_PULLDOWN;
+    //out1_config.pull = NRF_GPIO_PIN_PULLUP;
+    out1_config.pull = NRF_GPIO_PIN_PULLDOWN;
     out1_config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
     out1_config.is_watcher = false;
     out1_config.hi_accuracy = false;
@@ -108,8 +108,8 @@ void SENSOR_PIR_Out2Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 void SENSOR_PIR_OUT2Init(void)
 {
     nrf_drv_gpiote_in_config_t out2_config;
-    out2_config.pull = NRF_GPIO_PIN_PULLUP;
-    // out2_config.pull = NRF_GPIO_PIN_PULLDOWN;
+    //out2_config.pull = NRF_GPIO_PIN_PULLUP;
+    out2_config.pull = NRF_GPIO_PIN_PULLDOWN;
     out2_config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
     out2_config.is_watcher = false;
     out2_config.hi_accuracy = false;
