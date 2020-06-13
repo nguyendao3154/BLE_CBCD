@@ -19,9 +19,11 @@
  ******************************************************************************/
 #include "app_adc.h"
 
-#define SAMPLES_IN_BUFFER 1
+#define SAMPLES_IN_BUFFER 2
+#define NUMBERS_OF_CHANNEL 2
+#define PIR_NUMBER_CHANNEL 0
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
-#define BAT_NUMBER_CHANNEL 2
+#define BAT_NUMBER_CHANNEL 3
 #define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN3
 #define ADC_TIME_SCAN 5000 // ADC quet 1 ngay 1 lan
 
@@ -37,7 +39,7 @@ extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buf
 extern ble_cb_t m_cb;
 
 APP_TIMER_DEF(m_adc_id);
-static nrf_saadc_value_t m_buffer[SAMPLES_IN_BUFFER];
+static nrf_saadc_value_t m_buffer[SAMPLES_IN_BUFFER][NUMBERS_OF_CHANNEL];
 static uint32_t u32PinValue;
 
 /**
@@ -59,8 +61,11 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
         ret_code_t err_code;
         err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
         APP_ERROR_CHECK(err_code);
-        err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, SAMPLES_IN_BUFFER);
-        APP_ERROR_CHECK(err_code);
+
+        for (int i = 0; i < SAMPLES_IN_BUFFER; i++)
+        {
+            NRF_LOG_INFO("%d\r\n", p_event->data.done.p_buffer[i]);                                           //Print the SAADC result on UART
+        }
         //NRF_LOG_INFO("%d\n",p_event->data.done.p_buffer[0]);
         /* (p_event->data.done.p_buffer[0]) la gia tri doc ADC  
          * 10 bit resolution
@@ -70,7 +75,7 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
          */
         u32PinValue = (p_event->data.done.p_buffer[0])*TEN_TIMES_V_REF*100/HUNDRED_TIMES_ADC_GAIN_HARDWARE/ADC_RESOLUTION; 
         u8pinvalue = (uint8_t)u32PinValue;
-        NRF_LOG_INFO("%d\r\n", u32PinValue);
+        // NRF_LOG_INFO("%d\r\n", u32PinValue);
         //Clear the SAADC interrupt if set
     }
 }
@@ -80,7 +85,7 @@ void ADC_Init(void)
     ret_code_t err_code;
     nrf_saadc_channel_config_t channel1_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
     channel1_config.gain = NRF_SAADC_GAIN1;
-    // nrf_saadc_channel_config_t channel2_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
+    nrf_saadc_channel_config_t channel2_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_PIR_CHANNEL);
 
     err_code = nrf_drv_saadc_init(NULL, ADC_CallBack);
     APP_ERROR_CHECK(err_code);
@@ -88,10 +93,13 @@ void ADC_Init(void)
     err_code = nrf_drv_saadc_channel_init(BAT_NUMBER_CHANNEL, &channel1_config);
     APP_ERROR_CHECK(err_code);
 
-    // err_code = nrf_drv_saadc_channel_init(1, &channel2_config);
+    err_code = nrf_drv_saadc_channel_init(PIR_NUMBER_CHANNEL, &channel2_config);
     APP_ERROR_CHECK(err_code);
 
-    err_code = nrf_drv_saadc_buffer_convert(m_buffer, SAMPLES_IN_BUFFER);
+     err_code = nrf_drv_saadc_buffer_convert(m_buffer[0],SAMPLES_IN_BUFFER);    //Set SAADC buffer 1. The SAADC will start to write to this buffer
+    APP_ERROR_CHECK(err_code);
+    
+    err_code = nrf_drv_saadc_buffer_convert(m_buffer[1],SAMPLES_IN_BUFFER);    //Set SAADC buffer 2. The SAADC will write to this buffer when buffer 1 is full. This will give the applicaiton time to process data in buffer 1.
     APP_ERROR_CHECK(err_code);
     is_ADC_initialized = true;
 }

@@ -39,7 +39,7 @@ ble_gap_adv_data_t m_adv_data =
             
 extern ble_cb_t m_cb;
 extern volatile uint8_t u8pinvalue;
-extern volatile uint8_t pir_state;
+extern volatile uint8_t pir_task_state;
 extern volatile uint8_t magnetic_logic_level;
 
 void BLE_GapParamsInit(void)
@@ -192,7 +192,7 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
 
         BLECB_CheckError(err_code);
 
-        err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_state);
+        err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_task_state);
 
         BLECB_CheckError(err_code);
 

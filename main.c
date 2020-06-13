@@ -68,7 +68,7 @@ int main(void)
     {
 
         SENSOR_MagneticTask();
-        //SENSOR_PIR_Task();
+        SENSOR_PIR_Task();
         ADC_Task();
         //NRF_LOG_FLUSH();
 

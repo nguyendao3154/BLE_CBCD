@@ -25,28 +25,31 @@ extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buf
 extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
 extern ble_cb_t m_cb;
 
-uint8_t volatile pir_state;
-uint8_t pir_pre_state = 0, task_state = 0, task_pre_state = 0;
-uint8_t volatile magnetic_logic_level;
 bool magnetic_flag = false;
-uint8_t numof1000ticks;
+bool pir_flag = false;
+uint8_t volatile pir_task_state = 1;
+uint8_t pir_logic_level, pir_task_pre_state;
+uint8_t volatile magnetic_logic_level = 0;
+uint8_t magnetic_task_pre_state;
+uint32_t numsof100ticks_pir;
+uint32_t numsof100ticks_door;
 APP_TIMER_DEF(timer_systick_id);
-    
+
 void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
-{   
+{
     magnetic_flag = true;
     if (!nrf_gpio_pin_read(MAGNETIC_PIN))
-    {    
+    {
         magnetic_logic_level = 1;
         NRF_LOG_INFO("Co nam cham\r\n");
     }
     else
     {
         magnetic_logic_level = 0;
-        //NRF_LOG_INFO("Xa nam cham\r\n");
+        // NRF_LOG_INFO("Xa nam cham\r\n");
     }
 }
-    
+
 void SENSOR_MagneticInit(void)
 {
     nrf_drv_gpiote_in_config_t magnetic_config;
@@ -61,23 +64,24 @@ void SENSOR_MagneticInit(void)
 }
 void SENSOR_PIR_Out1Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
+    pir_flag = true;
     if (nrf_gpio_pin_read(PIR_OUT1_PIN))
     {
-        pir_state = 1;
+        pir_logic_level = 1;
         NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
-        pir_state = 0;
+        pir_logic_level = 0;
         NRF_LOG_INFO("CD 0\r\n");
     }
 }
-    
+
 void SENSOR_PIR_OUT1Init(void)
 {
     nrf_drv_gpiote_in_config_t out1_config;
-    //out1_config.pull = NRF_GPIO_PIN_PULLUP;
-    out1_config.pull = NRF_GPIO_PIN_PULLDOWN;
+    out1_config.pull = NRF_GPIO_PIN_PULLUP;
+    // out1_config.pull = NRF_GPIO_PIN_PULLDOWN;
     out1_config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
     out1_config.is_watcher = false;
     out1_config.hi_accuracy = false;
@@ -88,14 +92,15 @@ void SENSOR_PIR_OUT1Init(void)
 }
 void SENSOR_PIR_Out2Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
+    pir_flag = true;
     if (nrf_gpio_pin_read(PIR_OUT2_PIN))
     {
-        pir_state = 1;
+        pir_logic_level = 1;
         NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
-        pir_state = 0;
+        pir_logic_level = 0;
         NRF_LOG_INFO("CD 0\r\n");
     }
 }
@@ -103,8 +108,8 @@ void SENSOR_PIR_Out2Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 void SENSOR_PIR_OUT2Init(void)
 {
     nrf_drv_gpiote_in_config_t out2_config;
-    //out2_config.pull = NRF_GPIO_PIN_PULLUP;
-    out2_config.pull = NRF_GPIO_PIN_PULLDOWN;
+    out2_config.pull = NRF_GPIO_PIN_PULLUP;
+    // out2_config.pull = NRF_GPIO_PIN_PULLDOWN;
     out2_config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
     out2_config.is_watcher = false;
     out2_config.hi_accuracy = false;
@@ -119,50 +124,66 @@ void SENSOR_InterruptInit(void)
     SENSOR_MagneticInit();
     SENSOR_PIR_OUT1Init();
     SENSOR_PIR_OUT2Init();
-}
+}   
 void SENSOR_MagneticTask(void)
 {
     ret_code_t err_code;
     if (magnetic_flag)
     {
-        err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, magnetic_logic_level);
+        /* thay doi trang thai trong khoang thoi gian lon hon 0.5s */
+        if ((numsof100ticks_door > DOOR_MINIMUM_INTERVAL) && (magnetic_task_pre_state != magnetic_logic_level))
+        {
+            err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, magnetic_logic_level);
+            BLECB_CheckError(err_code);
+            numsof100ticks_door = 0;
+        }
 
-        BLECB_CheckError(err_code);
+        NRF_LOG_INFO("pre %d\n", magnetic_task_pre_state);
+        NRF_LOG_INFO("logic %d\n", magnetic_logic_level);
+        magnetic_task_pre_state = magnetic_logic_level;
         magnetic_flag = false;
+    }
+    /* lay trang thai cuoi cung neu co bug */
+    if ((numsof100ticks_door > DOOR_MINIMUM_INTERVAL) && (numsof100ticks_door < DOOR_MAXIMUM_INTERVAL))
+    {
+        err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, magnetic_logic_level);
+        BLECB_CheckError(err_code);
+        numsof100ticks_door = DOOR_MAXIMUM_INTERVAL + 1;
     }
 }
 void SENSOR_PIR_Task(void)
 {
     ret_code_t err_code;
+    if (pir_flag)
+    {
 
-    if ((numof1000ticks > PIR_TIMEOUT) && !pir_state) // ko co chuyen dong trong PIR_TIMEOUT giay
-    {
-        task_state = 2;
-        NRF_LOG_INFO("task 2");
+        if ((numsof100ticks_pir > PIR_TIMEOUT) && !pir_logic_level) // ko co chuyen dong trong PIR_TIMEOUT giay
+        {
+            pir_task_state = 0;
+            //NRF_LOG_INFO("task 0");
+        }
+        if (pir_logic_level) // co chuyen dong
+        {
+            pir_task_state = 1;
+            numsof100ticks_pir = 0;
+            //NRF_LOG_INFO("task 1");
+        }
+        if (pir_task_pre_state != pir_task_state)
+        {
+            err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_task_state);
+            BLECB_CheckError(err_code);
+        }
+        //NRF_LOG_INFO("%d\n", numsof1000ticks_pir);
+        // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_logic_level, pir_task_pre_state, pir_task_state);
+        pir_task_pre_state = pir_task_state;
+        pir_flag = false;
     }
-    if ((numof1000ticks > PIR_TIMEOUT) && pir_state) // co chuyen dong
-    {
-        task_state = 1;
-        NRF_LOG_INFO("task 1");
-    }
-    if (task_pre_state != task_state)
-    {
-        err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_state);
-        BLECB_CheckError(err_code);
-    }
-    if (pir_state)
-    {
-        numof1000ticks = 0;
-    }
-    //NRF_LOG_INFO("%d\n", numof1000ticks);
-    // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_state, task_pre_state, task_state);
-    pir_pre_state = pir_state;
-    task_pre_state = task_state;
 }
 
-void SENSOR_TickCount(void *p_context)
+void SENSOR_TickCount(void *p_context) // 10 ms
 {
-    numof1000ticks++;
+    numsof100ticks_pir++;
+    numsof100ticks_door++;
 }
 
 void SENSOR_CreateTimer(void)
@@ -172,7 +193,7 @@ void SENSOR_CreateTimer(void)
                                 APP_TIMER_MODE_REPEATED,
                                 SENSOR_TickCount);
     APP_ERROR_CHECK(err_code);
-    APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(1000), NULL));
+    APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(100), NULL)); // ngat 10 ms
 }
 
 /**
