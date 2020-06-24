@@ -25,7 +25,7 @@
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
 #define BAT_NUMBER_CHANNEL 3
 #define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN3
-#define ADC_TIME_SCAN 5000 // ADC quet 1 ngay 1 lan
+#define ADC_TIME_SCAN 100000 // ADC quet 1 ngay 1 lan
 
 #define ADC_RESOLUTION 1024
 #define TEN_TIMES_V_REF 6
@@ -64,7 +64,7 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
 
         for (int i = 0; i < SAMPLES_IN_BUFFER; i++)
         {
-            NRF_LOG_INFO("%d\r\n", p_event->data.done.p_buffer[i]);                                           //Print the SAADC result on UART
+            NRF_LOG_INFO("%d\r\n", p_event->data.done.p_buffer[i]); //Print the SAADC result on UART
         }
         //NRF_LOG_INFO("%d\n",p_event->data.done.p_buffer[0]);
         /* (p_event->data.done.p_buffer[0]) la gia tri doc ADC  
@@ -73,7 +73,7 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
          * Battery 3V
          * Gain 0.18
          */
-        u32PinValue = (p_event->data.done.p_buffer[0])*TEN_TIMES_V_REF*100/HUNDRED_TIMES_ADC_GAIN_HARDWARE/ADC_RESOLUTION; 
+        u32PinValue = (p_event->data.done.p_buffer[0]) * TEN_TIMES_V_REF * 100 / HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
         u8pinvalue = (uint8_t)u32PinValue;
         // NRF_LOG_INFO("%d\r\n", u32PinValue);
         //Clear the SAADC interrupt if set
@@ -96,10 +96,10 @@ void ADC_Init(void)
     err_code = nrf_drv_saadc_channel_init(PIR_NUMBER_CHANNEL, &channel2_config);
     APP_ERROR_CHECK(err_code);
 
-     err_code = nrf_drv_saadc_buffer_convert(m_buffer[0],SAMPLES_IN_BUFFER);    //Set SAADC buffer 1. The SAADC will start to write to this buffer
+    err_code = nrf_drv_saadc_buffer_convert(m_buffer[0], SAMPLES_IN_BUFFER); //Set SAADC buffer 1. The SAADC will start to write to this buffer
     APP_ERROR_CHECK(err_code);
-    
-    err_code = nrf_drv_saadc_buffer_convert(m_buffer[1],SAMPLES_IN_BUFFER);    //Set SAADC buffer 2. The SAADC will write to this buffer when buffer 1 is full. This will give the applicaiton time to process data in buffer 1.
+
+    err_code = nrf_drv_saadc_buffer_convert(m_buffer[1], SAMPLES_IN_BUFFER); //Set SAADC buffer 2. The SAADC will write to this buffer when buffer 1 is full. This will give the applicaiton time to process data in buffer 1.
     APP_ERROR_CHECK(err_code);
     is_ADC_initialized = true;
 }
@@ -132,13 +132,13 @@ void ADC_CreateTimer(void)
 
 void ADC_Task(void)
 {
-    ret_code_t err_code;
-    nrf_drv_saadc_sample();
     if (is_ADC_initialized)
     {
+        ret_code_t err_code;
+        nrf_drv_saadc_sample();
         err_code = BLECB_ADCChange(m_conn_handle, &m_cb, u8pinvalue);
         BLECB_CheckError(err_code);
-        ADC_DeinitDriver();                              // gui xong du lieu ADC, tat ADC driver de tiet kiem nang luong
+        ADC_DeinitDriver(); // gui xong du lieu ADC, tat ADC driver de tiet kiem nang luong
     }
 }
 

@@ -26,7 +26,6 @@ extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buf
 extern ble_cb_t m_cb;
 
 bool magnetic_flag = false;
-bool pir_flag = false;
 uint8_t volatile pir_task_state = 1;
 uint8_t pir_logic_level, pir_task_pre_state;
 uint8_t volatile magnetic_logic_level = 0;
@@ -64,7 +63,6 @@ void SENSOR_MagneticInit(void)
 }
 void SENSOR_PIR_Out1Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    pir_flag = true;
     if (nrf_gpio_pin_read(PIR_OUT1_PIN))
     {
         pir_logic_level = 1;
@@ -92,7 +90,6 @@ void SENSOR_PIR_OUT1Init(void)
 }
 void SENSOR_PIR_Out2Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    pir_flag = true;
     if (nrf_gpio_pin_read(PIR_OUT2_PIN))
     {
         pir_logic_level = 1;
@@ -154,8 +151,6 @@ void SENSOR_MagneticTask(void)
 void SENSOR_PIR_Task(void)
 {
     ret_code_t err_code;
-    if (pir_flag)
-    {
 
         if ((numsof100ticks_pir > PIR_TIMEOUT) && !pir_logic_level) // ko co chuyen dong trong PIR_TIMEOUT giay
         {
@@ -176,11 +171,9 @@ void SENSOR_PIR_Task(void)
         //NRF_LOG_INFO("%d\n", numsof1000ticks_pir);
         // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_logic_level, pir_task_pre_state, pir_task_state);
         pir_task_pre_state = pir_task_state;
-        pir_flag = false;
-    }
 }
 
-void SENSOR_TickCount(void *p_context) // 10 ms
+void SENSOR_TickCount(void *p_context) // 100 ms
 {
     numsof100ticks_pir++;
     numsof100ticks_door++;
@@ -193,7 +186,7 @@ void SENSOR_CreateTimer(void)
                                 APP_TIMER_MODE_REPEATED,
                                 SENSOR_TickCount);
     APP_ERROR_CHECK(err_code);
-    APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(100), NULL)); // ngat 10 ms
+    APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(100), NULL)); // ngat 100 ms
 }
 
 /**

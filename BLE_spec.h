@@ -40,13 +40,13 @@ extern "C"
 {
 #endif
 
-#define DEVICE_NAME "Door" /**< Name of device. Will be included in the advertising data. */
-#define MODEL_NUMBER "MKP_Door_0001"
+#define DEVICE_NAME "MKP PIR Sensor" /**< Name of device. Will be included in the advertising data. */
+#define MODEL_NUMBER "MKP_PIR_0001"
 #define MANUFACTURER_NAME "Makihome"
 #define APP_BLE_OBSERVER_PRIO 3                                /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG 1                                 /**< A tag identifying the SoftDevice BLE configuration. */
 #define APP_TIMER_PRESCALER 0                                  /**< Value of the RTC1 PRESCALER register. */
-#define APP_ADV_INTERVAL 640                                   /**< The advertising interval (in units of 0.625 ms; this value corresponds to 400 ms). */
+#define APP_ADV_INTERVAL 1600                                   /**< The advertising interval (in units of 0.625 ms; this value corresponds to 400 ms). */
 #define APP_ADV_DURATION BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED /**< The advertising time-out (in units of seconds). When set to 0, we will never time out. */
 
 #define MIN_CONN_INTERVAL MSEC_TO_UNITS(100, UNIT_1_25_MS) /**< Minimum acceptable connection interval (0.5 seconds). */
