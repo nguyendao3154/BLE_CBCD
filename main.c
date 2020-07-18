@@ -52,6 +52,7 @@ int main(void)
     timers_init();
     power_management_init();
     SENSOR_InterruptInit();
+    SENSOR_MagneticGetInitialValue();
     ADC_Init();
     BLE_StackInit();
     BLE_GapParamsInit();
@@ -62,16 +63,15 @@ int main(void)
     BLE_AdvertisingStart();
     nrf_drv_saadc_sample();
     // Start execution.
-    NRF_LOG_INFO("CBCD started.");
+    //NRF_LOG_INFO("CBCD started.");
     // Enter main loop.
     for (;;)
     {
-
-        //SENSOR_MagneticTask();
-        SENSOR_PIR_Task();
+	
+        SENSOR_MagneticTask();
+        //SENSOR_PIR_Task();
         ADC_Task();
         //NRF_LOG_FLUSH();
-
         nrf_pwr_mgmt_run();
     }
 }

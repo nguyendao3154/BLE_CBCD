@@ -19,6 +19,11 @@
  ******************************************************************************/
 #include "app_sensor.h"
 
+
+#define PIR_TIMEOUT 100             // 10s
+#define DOOR_MINIMUM_INTERVAL 5     // 0.5s
+#define DOOR_MAXIMUM_INTERVAL 8
+#define DEFAULT_MAGNETIC_STATE 3
 extern uint16_t m_conn_handle;                                          /**< Handle of the current connection. */
 extern uint8_t m_adv_handle;                                            /**< Advertising handle used to identify an advertising set. */
 extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buffer for storing an encoded advertising set. */
@@ -28,19 +33,23 @@ extern ble_cb_t m_cb;
 bool magnetic_flag = false;
 uint8_t volatile pir_task_state = 1;
 uint8_t pir_logic_level, pir_task_pre_state;
-uint8_t volatile magnetic_logic_level = 0;
-uint8_t magnetic_task_pre_state;
+uint8_t volatile magnetic_logic_level;
+uint8_t magnetic_task_pre_state = DEFAULT_MAGNETIC_STATE;
 uint32_t numsof100ticks_pir;
 uint32_t numsof100ticks_door;
 APP_TIMER_DEF(timer_systick_id);
 
+void SENSOR_MagneticGetInitialValue(void)
+{
+    magnetic_logic_level = !nrf_gpio_pin_read(MAGNETIC_PIN);
+}
 void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
     magnetic_flag = true;
     if (!nrf_gpio_pin_read(MAGNETIC_PIN))
     {
         magnetic_logic_level = 1;
-        NRF_LOG_INFO("Co nam cham\r\n");
+        //NRF_LOG_INFO("Co nam cham\r\n");
     }
     else
     {
@@ -66,12 +75,12 @@ void SENSOR_PIR_Out1Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
     if (nrf_gpio_pin_read(PIR_OUT1_PIN))
     {
         pir_logic_level = 1;
-        NRF_LOG_INFO("CD 1\r\n");
+        //NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
         pir_logic_level = 0;
-        NRF_LOG_INFO("CD 0\r\n");
+        //NRF_LOG_INFO("CD 0\r\n");
     }
 }
 
@@ -93,12 +102,12 @@ void SENSOR_PIR_Out2Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
     if (nrf_gpio_pin_read(PIR_OUT2_PIN))
     {
         pir_logic_level = 1;
-        NRF_LOG_INFO("CD 1\r\n");
+        //NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
         pir_logic_level = 0;
-        NRF_LOG_INFO("CD 0\r\n");
+        //NRF_LOG_INFO("CD 0\r\n");
     }
 }
 
@@ -135,8 +144,8 @@ void SENSOR_MagneticTask(void)
             numsof100ticks_door = 0;
         }
 
-        NRF_LOG_INFO("pre %d\n", magnetic_task_pre_state);
-        NRF_LOG_INFO("logic %d\n", magnetic_logic_level);
+        //NRF_LOG_INFO("pre %d\n", magnetic_task_pre_state);
+        //NRF_LOG_INFO("logic %d\n", magnetic_logic_level);
         magnetic_task_pre_state = magnetic_logic_level;
         magnetic_flag = false;
     }

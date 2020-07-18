@@ -18,6 +18,8 @@
  * Include
  ******************************************************************************/
 #include "BLE_spec.h"
+#include "SEGGER_RTT.h"
+#include "SEGGER_RTT_Conf.h"
 
 uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**< Handle of the current connection. */
 
@@ -185,7 +187,7 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
     switch (p_ble_evt->header.evt_id)
     {
     case BLE_GAP_EVT_CONNECTED:
-        NRF_LOG_INFO("Connected");
+        //NRF_LOG_INFO("Connected");
         m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
 
         err_code = BLECB_ADCChange(m_conn_handle, &m_cb, u8pinvalue);
@@ -196,14 +198,14 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
 
         BLECB_CheckError(err_code);
 
-        err_code = BLECB_ADCChange(m_conn_handle, &m_cb, magnetic_logic_level);
+        err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, magnetic_logic_level);
 
         BLECB_CheckError(err_code);
 
         break;
 
     case BLE_GAP_EVT_DISCONNECTED:
-        NRF_LOG_INFO("Disconnected");
+        //NRF_LOG_INFO("Disconnected");
         m_conn_handle = BLE_CONN_HANDLE_INVALID;
         BLE_AdvertisingStart();
         break;

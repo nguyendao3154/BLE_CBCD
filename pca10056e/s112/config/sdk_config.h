@@ -6082,7 +6082,7 @@
 
 // <o> HCI_UART_TX_PIN - UART TX pin 
 #ifndef HCI_UART_TX_PIN
-#define HCI_UART_TX_PIN 12
+#define HCI_UART_TX_PIN 25
 #endif
 
 // <o> HCI_UART_RTS_PIN - UART RTS pin 
@@ -6911,7 +6911,7 @@
 #endif
 // <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin 
 #ifndef NRF_LOG_BACKEND_UART_TX_PIN
-#define NRF_LOG_BACKEND_UART_TX_PIN 12
+#define NRF_LOG_BACKEND_UART_TX_PIN 25
 #endif
 
 // <o> NRF_LOG_BACKEND_UART_BAUDRATE  - Default Baudrate

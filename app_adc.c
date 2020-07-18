@@ -64,7 +64,7 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
 
         for (int i = 0; i < SAMPLES_IN_BUFFER; i++)
         {
-            NRF_LOG_INFO("%d\r\n", p_event->data.done.p_buffer[i]); //Print the SAADC result on UART
+            //NRF_LOG_INFO("%d\r\n", p_event->data.done.p_buffer[i]); //Print the SAADC result on UART
         }
         //NRF_LOG_INFO("%d\n",p_event->data.done.p_buffer[0]);
         /* (p_event->data.done.p_buffer[0]) la gia tri doc ADC  

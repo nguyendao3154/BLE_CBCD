@@ -23,19 +23,17 @@
 #include "app_timer.h"
 #include "BLE_spec.h"
 
-#define MAGNETIC_PIN 25
-#define PIR_OUT1_PIN 9
-#define PIR_OUT2_PIN 10
-
-#define PIR_TIMEOUT 100         // 10s
-#define DOOR_MINIMUM_INTERVAL 5     // 0.5s
-#define DOOR_MAXIMUM_INTERVAL 8
-
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+#define MAGNETIC_PIN 4
+#define PIR_OUT1_PIN 9
+#define PIR_OUT2_PIN 10
+
+void SENSOR_MagneticGetInitialValue(void);
+
 void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
 void SENSOR_MagneticInit(void);
