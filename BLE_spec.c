@@ -87,6 +87,8 @@ void BLE_ServicesInit(ble_cb_t *p_cb)
 
     ble_srv_ascii_to_utf8(&dis_init.model_num_str, (char *)MODEL_NUMBER);
 
+    ble_srv_ascii_to_utf8(&dis_init.serial_num_str, (char*)SERIAL_NUMBER);
+
     dis_init.dis_char_rd_sec = SEC_OPEN;
 
     err_code = ble_dis_init(&dis_init);
