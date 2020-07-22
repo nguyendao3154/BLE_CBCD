@@ -55,7 +55,7 @@ int main(void)
     SENSOR_MagneticGetInitialValue();
     ADC_Init();
     BLE_StackInit();
-	// sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
+		sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
     BLE_GapParamsInit();
     BLE_GattInit(&m_gatt);
     BLE_ServicesInit(&m_cb);
@@ -63,6 +63,7 @@ int main(void)
     BLE_ConnParamsInit();
     BLE_AdvertisingStart();
     nrf_drv_saadc_sample();
+		//ADC_DeinitDriver();
     // Start execution.
     //NRF_LOG_INFO("CBCD started.");
     // Enter main loop.

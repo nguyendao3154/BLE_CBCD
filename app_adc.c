@@ -30,7 +30,7 @@
 #define ADC_RESOLUTION 1024
 #define TEN_TIMES_V_REF 6
 #define HUNDRED_TIMES_ADC_GAIN_HARDWARE 18
-bool is_ADC_initialized;
+bool is_ADC_initialized = false;
 volatile uint8_t u8pinvalue;
 extern uint16_t m_conn_handle;                                          /**< Handle of the current connection. */
 extern uint8_t m_adv_handle;                                            /**< Advertising handle used to identify an advertising set. */
@@ -48,6 +48,7 @@ static uint32_t u32PinValue;
 void ADC_DeinitDriver(void)
 {
     // NRF_LOG_INFO("Off");
+    nrf_drv_saadc_is_busy();
     nrf_drv_saadc_uninit();                                                     //Unintialize SAADC to disable EasyDMA and save power
     NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
     NVIC_ClearPendingIRQ(SAADC_IRQn);

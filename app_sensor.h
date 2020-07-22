@@ -28,7 +28,7 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-#define MAGNETIC_PIN 25
+#define MAGNETIC_PIN 4
 #define PIR_OUT1_PIN 9
 #define PIR_OUT2_PIN 10
 
