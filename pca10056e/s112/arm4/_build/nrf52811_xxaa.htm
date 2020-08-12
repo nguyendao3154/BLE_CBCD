@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\_build\nrf52811_xxaa.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\_build\nrf52811_xxaa.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Wed Aug 12 14:19:26 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Wed Aug 12 15:17:41 2020
 <BR><P>
 <H3>Maximum Stack Usage =        280 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -417,7 +417,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_error_handler_bare
 </UL>
 <BR>[Called By]<UL><LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLE_EvtHandler
-<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_MagneticTask
+<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_PIR_Task
 <LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ADC_Task
 </UL>
 
@@ -434,13 +434,13 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = BLECB_MagneticChange
 </UL>
 <BR>[Called By]<UL><LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLE_EvtHandler
-<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_MagneticTask
 </UL>
 
 <P><STRONG><a name="[5c]"></a>BLECB_PIRChange</STRONG> (Thumb, 46 bytes, Stack size 40 bytes, cambien_service.o(i.BLECB_PIRChange))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = BLECB_PIRChange
 </UL>
 <BR>[Called By]<UL><LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLE_EvtHandler
+<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_PIR_Task
 </UL>
 
 <P><STRONG><a name="[57]"></a>BLE_AdvertisingInit</STRONG> (Thumb, 166 bytes, Stack size 160 bytes, ble_spec.o(i.BLE_AdvertisingInit))
@@ -640,15 +640,6 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_InterruptInit
 </UL>
 
-<P><STRONG><a name="[82]"></a>SENSOR_MagneticTask</STRONG> (Thumb, 94 bytes, Stack size 16 bytes, app_sensor.o(i.SENSOR_MagneticTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = SENSOR_MagneticTask &rArr; BLECB_MagneticChange
-</UL>
-<BR>[Calls]<UL><LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLECB_MagneticChange
-<LI><a href="#[53]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLECB_CheckError
-</UL>
-<BR>[Called By]<UL><LI><a href="#[25]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-</UL>
-
 <P><STRONG><a name="[7c]"></a>SENSOR_PIR_OUT1Init</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, app_sensor.o(i.SENSOR_PIR_OUT1Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 60<LI>Call Chain = SENSOR_PIR_OUT1Init &rArr; nrfx_gpiote_in_init &rArr; channel_port_alloc
 </UL>
@@ -681,6 +672,15 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> app_sensor.o(i.SENSOR_PIR_OUT2Init)
 </UL>
+<P><STRONG><a name="[82]"></a>SENSOR_PIR_Task</STRONG> (Thumb, 74 bytes, Stack size 16 bytes, app_sensor.o(i.SENSOR_PIR_Task))
+<BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = SENSOR_PIR_Task &rArr; BLECB_PIRChange
+</UL>
+<BR>[Calls]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLECB_PIRChange
+<LI><a href="#[53]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLECB_CheckError
+</UL>
+<BR>[Called By]<UL><LI><a href="#[25]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+</UL>
+
 <P><STRONG><a name="[2c]"></a>SENSOR_TickCount</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, app_sensor.o(i.SENSOR_TickCount))
 <BR>[Address Reference Count : 1]<UL><LI> app_sensor.o(i.SENSOR_CreateTimer)
 </UL>
@@ -935,7 +935,7 @@ Global Symbols
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;nrf_pwr_mgmt_run
 <LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_timer_init
 <LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_error_handler_bare
-<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_MagneticTask
+<LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_PIR_Task
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_MagneticGetInitialValue
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_InterruptInit
 <LI><a href="#[78]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SENSOR_CreateTimer

@@ -71,11 +71,11 @@ int main(void)
     for (;;)
     {
 	
-        SENSOR_MagneticTask();
-        //SENSOR_PIR_Task();
+        //SENSOR_MagneticTask();
+        SENSOR_PIR_Task();
         ADC_Task();
         LED_Task();
-        NRF_LOG_FLUSH();
+        //NRF_LOG_FLUSH();
         nrf_pwr_mgmt_run();
     }
 }
