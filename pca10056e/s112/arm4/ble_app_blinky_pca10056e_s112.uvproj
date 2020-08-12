@@ -555,6 +555,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\app_sensor.c</FilePath>
             </File>
+            <File>
+              <FileName>app_led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\app_led.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4017,6 +4022,11 @@
               <FileName>app_sensor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\app_sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\app_led.c</FilePath>
             </File>
           </Files>
         </Group>

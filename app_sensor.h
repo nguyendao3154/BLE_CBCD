@@ -22,6 +22,7 @@
 #include "nrf_drv_gpiote.h"
 #include "app_timer.h"
 #include "BLE_spec.h"
+#include "app_led.h"
 
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/

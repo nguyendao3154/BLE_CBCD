@@ -19,8 +19,8 @@
  ******************************************************************************/
 #include "app_adc.h"
 
-#define SAMPLES_IN_BUFFER 2
-#define NUMBERS_OF_CHANNEL 2
+#define SAMPLES_IN_BUFFER 1
+#define NUMBERS_OF_CHANNEL 1
 #define PIR_NUMBER_CHANNEL 0
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
 #define BAT_NUMBER_CHANNEL 3
@@ -94,14 +94,14 @@ void ADC_Init(void)
     err_code = nrf_drv_saadc_channel_init(BAT_NUMBER_CHANNEL, &channel1_config);
     APP_ERROR_CHECK(err_code);
 
-    err_code = nrf_drv_saadc_channel_init(PIR_NUMBER_CHANNEL, &channel2_config);
-    APP_ERROR_CHECK(err_code);
+    //err_code = nrf_drv_saadc_channel_init(PIR_NUMBER_CHANNEL, &channel2_config);
+    //APP_ERROR_CHECK(err_code);
 
     err_code = nrf_drv_saadc_buffer_convert(m_buffer[0], SAMPLES_IN_BUFFER); //Set SAADC buffer 1. The SAADC will start to write to this buffer
     APP_ERROR_CHECK(err_code);
 
-    err_code = nrf_drv_saadc_buffer_convert(m_buffer[1], SAMPLES_IN_BUFFER); //Set SAADC buffer 2. The SAADC will write to this buffer when buffer 1 is full. This will give the applicaiton time to process data in buffer 1.
-    APP_ERROR_CHECK(err_code);
+    //err_code = nrf_drv_saadc_buffer_convert(m_buffer[1], SAMPLES_IN_BUFFER); //Set SAADC buffer 2. The SAADC will write to this buffer when buffer 1 is full. This will give the applicaiton time to process data in buffer 1.
+    //APP_ERROR_CHECK(err_code);
     is_ADC_initialized = true;
 }
 /**

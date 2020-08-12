@@ -6,7 +6,7 @@
 #include "cambien_service.h"
 #include "app_adc.h"
 #include "app_sensor.h"
-
+#include "app_led.h"
 #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 // bool m_saadc_initialized = false;
@@ -48,20 +48,21 @@ void power_management_init(void)
 int main(void)
 {
     // Initialize.
-    //log_init();
+    log_init();
     timers_init();
     power_management_init();
     SENSOR_InterruptInit();
     SENSOR_MagneticGetInitialValue();
     ADC_Init();
     BLE_StackInit();
-		sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
+		//sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
     BLE_GapParamsInit();
     BLE_GattInit(&m_gatt);
     BLE_ServicesInit(&m_cb);
     BLE_AdvertisingInit(&m_cb);
     BLE_ConnParamsInit();
     BLE_AdvertisingStart();
+    LED_Config();
     nrf_drv_saadc_sample();
 		//ADC_DeinitDriver();
     // Start execution.
@@ -73,7 +74,8 @@ int main(void)
         SENSOR_MagneticTask();
         //SENSOR_PIR_Task();
         ADC_Task();
-        //NRF_LOG_FLUSH();
+        //LED_Task();
+        NRF_LOG_FLUSH();
         nrf_pwr_mgmt_run();
     }
 }
