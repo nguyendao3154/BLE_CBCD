@@ -48,14 +48,14 @@ void power_management_init(void)
 int main(void)
 {
     // Initialize.
-    log_init();
+    // log_init();
     timers_init();
     power_management_init();
     SENSOR_InterruptInit();
     SENSOR_MagneticGetInitialValue();
     ADC_Init();
     BLE_StackInit();
-		//sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
+		sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
     BLE_GapParamsInit();
     BLE_GattInit(&m_gatt);
     BLE_ServicesInit(&m_cb);

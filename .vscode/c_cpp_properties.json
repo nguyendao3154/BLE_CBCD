@@ -8,7 +8,8 @@
                 "D:/NRF_SDK/components/ble",
                 "D:/NRF_SDK/integration/nrfx/legacy",
                 "D:/NRF_SDK/modules/nrfx/drivers/include",
-                "D:/NRF_SDK/modules/nrfx/hal"
+                "D:/NRF_SDK/modules/nrfx/hal",
+                "D:/NRF_SDK/components/ble/**"
                 
             ],
             "defines": [

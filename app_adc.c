@@ -27,9 +27,10 @@
 #define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN3
 #define ADC_TIME_SCAN 100000 // ADC quet 1 ngay 1 lan
 
-#define ADC_RESOLUTION 1024
+#define ADC_RESOLUTION 4095
 #define TEN_TIMES_V_REF 6
 #define HUNDRED_TIMES_ADC_GAIN_HARDWARE 18
+#define ADC_GAIN_SOFTWARE 4
 bool is_ADC_initialized = false;
 volatile uint8_t u8pinvalue;
 extern uint16_t m_conn_handle;                                          /**< Handle of the current connection. */
@@ -74,7 +75,7 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
          * Battery 3V
          * Gain 0.18
          */
-        u32PinValue = (p_event->data.done.p_buffer[0]) * TEN_TIMES_V_REF * 100 / HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
+        u32PinValue = (p_event->data.done.p_buffer[0]) * TEN_TIMES_V_REF * 100 * ADC_GAIN_SOFTWARE/ HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
         u8pinvalue = (uint8_t)u32PinValue;
         // NRF_LOG_INFO("%d\r\n", u32PinValue);
         //Clear the SAADC interrupt if set
@@ -85,7 +86,7 @@ void ADC_Init(void)
     // NRF_LOG_INFO("init");
     ret_code_t err_code;
     nrf_saadc_channel_config_t channel1_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_BAT_CHANNEL);
-    channel1_config.gain = NRF_SAADC_GAIN1;
+    channel1_config.gain = NRF_SAADC_GAIN1_4;
     nrf_saadc_channel_config_t channel2_config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(AIN_PIR_CHANNEL);
 
     err_code = nrf_drv_saadc_init(NULL, ADC_CallBack);

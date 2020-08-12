@@ -27,9 +27,7 @@ void LED_Task(void)
 {
     if (sensor_ticks - led_current_time > LED_ON_TIME_DEFAUT)
     {
-        NRF_LOG_INFO("tat ");
-        LED_Turn_off();
-        
+        LED_Turn_off();       
     }  
     if(request_led_on)
     {

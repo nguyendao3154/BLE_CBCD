@@ -147,7 +147,7 @@ void SENSOR_MagneticTask(void)
         {
             door_previous_ticks = door_current_ticks;
             err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, magnetic_logic_level);
-            NRF_LOG_INFO("Notify1");
+            // NRF_LOG_INFO("Notify1");
             BLECB_CheckError(err_code);
             magnetic_task_pre_state = magnetic_logic_level;
         }
@@ -157,7 +157,7 @@ void SENSOR_MagneticTask(void)
     {
         door_previous_ticks = door_current_ticks;
         err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, magnetic_logic_level);
-        NRF_LOG_INFO("Notify2");
+        // NRF_LOG_INFO("Notify2");
         BLECB_CheckError(err_code);
         magnetic_task_pre_state = magnetic_logic_level;
     }
