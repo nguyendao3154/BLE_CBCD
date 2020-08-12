@@ -29,6 +29,7 @@ extern uint8_t m_adv_handle;                                            /**< Adv
 extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buffer for storing an encoded advertising set. */
 extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
 extern ble_cb_t m_cb;
+extern bool request_led_on;
 
 bool magnetic_flag = false;
 uint8_t volatile pir_task_state = 1;
@@ -52,6 +53,7 @@ void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 
     if (!nrf_gpio_pin_read(MAGNETIC_PIN))
     {
+        request_led_on = true;
         magnetic_logic_level = 1;
         //NRF_LOG_INFO("Co nam cham\r\n");
     }
@@ -175,6 +177,7 @@ void SENSOR_PIR_Task(void)
     {
         pir_task_state = 1;
         numsof100ticks_pir = sensor_ticks;
+        request_led_on = true;
         //NRF_LOG_INFO("task 1");
     }
     if (pir_task_pre_state != pir_task_state)

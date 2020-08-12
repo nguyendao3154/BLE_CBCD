@@ -74,7 +74,7 @@ int main(void)
         SENSOR_MagneticTask();
         //SENSOR_PIR_Task();
         ADC_Task();
-        //LED_Task();
+        LED_Task();
         NRF_LOG_FLUSH();
         nrf_pwr_mgmt_run();
     }
