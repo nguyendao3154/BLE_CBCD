@@ -38,7 +38,7 @@ extern uint8_t pir_sensitivity;
 
 extern uint16_t pir_adc_value;
 
-uint16_t pir_offset_value[2] = {1400, 2500};
+uint16_t pir_offset_value[2] = {1425, 2525};
 bool magnetic_flag = false;
 uint8_t volatile pir_task_state = 1;
 uint8_t pir_logic_level, pir_task_pre_state;
@@ -78,7 +78,7 @@ void SENSOR_PIR_Software_Reg(void)
     if ((pir_adc_value < (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity)) || (pir_adc_value > (pir_offset_value[1] - PIR_INTERVAL_SCALE * pir_sensitivity)))
     {
         pir_logic_level = 1;
-        NRF_LOG_INFO("%d", (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity));
+        // NRF_LOG_INFO("%d", (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity));
     }
     else
     {

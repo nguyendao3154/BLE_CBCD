@@ -1,6 +1,5 @@
 #include "app_led.h"
 
-#define LED_PIN 25
 #define LED_ON_TIME_DEFAUT 30              // 3s
 
 bool request_led_on = false;

@@ -19,6 +19,8 @@
 #include "nrf_gpio.h"
 #include "app_timer.h"
 
+#define LED_PIN 25
+
 void LED_Config(void);
 
 void LED_Turn_on(void);

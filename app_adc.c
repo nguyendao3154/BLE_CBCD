@@ -24,13 +24,14 @@
 #define AIN_PIR_CHANNEL NRF_SAADC_INPUT_AIN0
 #define BAT_NUMBER_CHANNEL 4
 #define AIN_BAT_CHANNEL NRF_SAADC_INPUT_AIN3
-#define ADC_TIME_SCAN 250 // ADC quet 1 ngay 1 lan
+#define ADC_TIME_SCAN 100 // ADC quet 1 ngay 1 lan
 
 #define ADC_RESOLUTION 4095
 #define TEN_TIMES_V_REF 6
 #define HUNDRED_TIMES_ADC_GAIN_HARDWARE 18
 #define ADC_GAIN_SOFTWARE 4
 
+uint16_t adc_time_send;
 uint16_t pir_adc_value;
 bool is_ADC_initialized = false;
 volatile uint8_t u8pinvalue;
@@ -77,38 +78,38 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
          * Battery 3V
          * Gain 0.18
          */
-        u32PinValue = (p_event->data.done.p_buffer[1]) * TEN_TIMES_V_REF * 100 * ADC_GAIN_SOFTWARE/ HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
+        u32PinValue = (p_event->data.done.p_buffer[1]) * TEN_TIMES_V_REF * 100 * ADC_GAIN_SOFTWARE / HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
         u8pinvalue = (uint8_t)u32PinValue;
         // u8pinvalue = (p_event->data.done.p_buffer[1])/10;
         // NRF_LOG_INFO("%d\r\n", (p_event->data.done.p_buffer[0])*4);
-        pir_adc_value = (p_event->data.done.p_buffer[0])*4;
+        pir_adc_value = (p_event->data.done.p_buffer[0]) * 100 / HUNDRED_TIMES_ADC_GAIN_HARDWARE;
         //Clear the SAADC interrupt if set
     }
 }
 void ADC_Init(void)
 {
-     ret_code_t err_code;
+    ret_code_t err_code;
     nrf_drv_saadc_config_t saadc_config;
     nrf_saadc_channel_config_t channel_config_1;
     nrf_saadc_channel_config_t channel_config_2;
-    
+
     //Configure SAADC
-    saadc_config.resolution = NRF_SAADC_RESOLUTION_12BIT;                                 //Set SAADC resolution to 12-bit. This will make the SAADC output values from 0 (when input voltage is 0V) to 2^12=2048 (when input voltage is 3.6V for channel gain setting of 1/6).
-    saadc_config.oversample = NRF_SAADC_OVERSAMPLE_DISABLED ;                                           //Set oversample to disabled (will give unwanted output with scan mode).
-    saadc_config.interrupt_priority = APP_IRQ_PRIORITY_LOW;                               //Set SAADC interrupt to low priority.
-	
+    saadc_config.resolution = NRF_SAADC_RESOLUTION_12BIT;    //Set SAADC resolution to 12-bit. This will make the SAADC output values from 0 (when input voltage is 0V) to 2^12=2048 (when input voltage is 3.6V for channel gain setting of 1/6).
+    saadc_config.oversample = NRF_SAADC_OVERSAMPLE_DISABLED; //Set oversample to disabled (will give unwanted output with scan mode).
+    saadc_config.interrupt_priority = APP_IRQ_PRIORITY_LOW;  //Set SAADC interrupt to low priority.
+
     //Initialize SAADC
-    err_code = nrf_drv_saadc_init(&saadc_config, ADC_CallBack);                         //Initialize the SAADC with configuration and callback function. The application must then implement the saadc_callback function, which will be called when SAADC interrupt is triggered
+    err_code = nrf_drv_saadc_init(&saadc_config, ADC_CallBack); //Initialize the SAADC with configuration and callback function. The application must then implement the saadc_callback function, which will be called when SAADC interrupt is triggered
     APP_ERROR_CHECK(err_code);
-    
+
     //Configure SAADC channel
-    channel_config_1.reference = NRF_SAADC_REFERENCE_INTERNAL;                              //Set internal reference of fixed 0.6 volts
-    channel_config_1.gain = NRF_SAADC_GAIN1_4;                                                //Set input gain to 1/6. The maximum SAADC input voltage is then 0.6V/(1/6)=3.6V. The single ended input range is then 0V-3.6V
-    channel_config_1.acq_time = NRF_SAADC_ACQTIME_10US;                                     //Set acquisition time. Set low acquisition time to enable maximum sampling frequency of 200kHz. Set high acquisition time to allow maximum source resistance up to 800 kohm, see the SAADC electrical specification in the PS. 
-    channel_config_1.mode = NRF_SAADC_MODE_SINGLE_ENDED;                                    //Set SAADC as single ended. This means it will only have the positive pin as input, and the negative pin is shorted to ground (0V) internally.
-    channel_config_1.pin_p = NRF_SAADC_INPUT_AIN3;                                          //Select the input pin for the channel. AIN0 pin maps to physical pin P0.02.
-    channel_config_1.pin_n = NRF_SAADC_INPUT_DISABLED;                                      //Since the SAADC is single ended, the negative pin is disabled. The negative pin is shorted to ground internally.
-    channel_config_1.resistor_p = NRF_SAADC_RESISTOR_DISABLED;                              //Disable pullup resistor on the input pin
+    channel_config_1.reference = NRF_SAADC_REFERENCE_VDD4;     //Set internal reference of fixed 0.6 volts
+    channel_config_1.gain = NRF_SAADC_GAIN1_4;                 //Set input gain to 1/6. The maximum SAADC input voltage is then 0.6V/(1/6)=3.6V. The single ended input range is then 0V-3.6V
+    channel_config_1.acq_time = NRF_SAADC_ACQTIME_10US;        //Set acquisition time. Set low acquisition time to enable maximum sampling frequency of 200kHz. Set high acquisition time to allow maximum source resistance up to 800 kohm, see the SAADC electrical specification in the PS.
+    channel_config_1.mode = NRF_SAADC_MODE_SINGLE_ENDED;       //Set SAADC as single ended. This means it will only have the positive pin as input, and the negative pin is shorted to ground (0V) internally.
+    channel_config_1.pin_p = NRF_SAADC_INPUT_AIN3;             //Select the input pin for the channel. AIN0 pin maps to physical pin P0.02.
+    channel_config_1.pin_n = NRF_SAADC_INPUT_DISABLED;         //Since the SAADC is single ended, the negative pin is disabled. The negative pin is shorted to ground internally.
+    channel_config_1.resistor_p = NRF_SAADC_RESISTOR_DISABLED; //Disable pullup resistor on the input pin
     channel_config_1.resistor_n = NRF_SAADC_RESISTOR_DISABLED;
     channel_config_1.burst = NRF_SAADC_BURST_DISABLED;
 
@@ -116,25 +117,25 @@ void ADC_Init(void)
     APP_ERROR_CHECK(err_code);
 
     //Configure SAADC channel
-    channel_config_2.reference = NRF_SAADC_REFERENCE_INTERNAL;                              //Set internal reference of fixed 0.6 volts
-    channel_config_2.gain = NRF_SAADC_GAIN1_4;                                                //Set input gain to 1/6. The maximum SAADC input voltage is then 0.6V/(1/6)=3.6V. The single ended input range is then 0V-3.6V
-    channel_config_2.acq_time = NRF_SAADC_ACQTIME_10US;                                     //Set acquisition time. Set low acquisition time to enable maximum sampling frequency of 200kHz. Set high acquisition time to allow maximum source resistance up to 800 kohm, see the SAADC electrical specification in the PS. 
-    channel_config_2.mode = NRF_SAADC_MODE_SINGLE_ENDED;                                    //Set SAADC as single ended. This means it will only have the positive pin as input, and the negative pin is shorted to ground (0V) internally.
-    channel_config_2.pin_p = NRF_SAADC_INPUT_AIN4;                                          //Select the input pin for the channel. AIN0 pin maps to physical pin P0.02.
-    channel_config_2.pin_n = NRF_SAADC_INPUT_DISABLED;                                      //Since the SAADC is single ended, the negative pin is disabled. The negative pin is shorted to ground internally.
-    channel_config_2.resistor_p = NRF_SAADC_RESISTOR_DISABLED;                              //Disable pullup resistor on the input pin
-    channel_config_2.resistor_n = NRF_SAADC_RESISTOR_DISABLED;                              //Disable pulldown resistor on the input pin
+    channel_config_2.reference = NRF_SAADC_REFERENCE_INTERNAL; //Set internal reference of fixed 0.6 volts
+    channel_config_2.gain = NRF_SAADC_GAIN1_4;                 //Set input gain to 1/6. The maximum SAADC input voltage is then 0.6V/(1/6)=3.6V. The single ended input range is then 0V-3.6V
+    channel_config_2.acq_time = NRF_SAADC_ACQTIME_10US;        //Set acquisition time. Set low acquisition time to enable maximum sampling frequency of 200kHz. Set high acquisition time to allow maximum source resistance up to 800 kohm, see the SAADC electrical specification in the PS.
+    channel_config_2.mode = NRF_SAADC_MODE_SINGLE_ENDED;       //Set SAADC as single ended. This means it will only have the positive pin as input, and the negative pin is shorted to ground (0V) internally.
+    channel_config_2.pin_p = NRF_SAADC_INPUT_AIN4;             //Select the input pin for the channel. AIN0 pin maps to physical pin P0.02.
+    channel_config_2.pin_n = NRF_SAADC_INPUT_DISABLED;         //Since the SAADC is single ended, the negative pin is disabled. The negative pin is shorted to ground internally.
+    channel_config_2.resistor_p = NRF_SAADC_RESISTOR_DISABLED; //Disable pullup resistor on the input pin
+    channel_config_2.resistor_n = NRF_SAADC_RESISTOR_DISABLED; //Disable pulldown resistor on the input pin
     channel_config_2.burst = NRF_SAADC_BURST_DISABLED;
 
     err_code = nrf_drv_saadc_channel_init(BAT_NUMBER_CHANNEL, &channel_config_2);
     APP_ERROR_CHECK(err_code);
-    
+
     err_code = nrf_drv_saadc_buffer_convert(m_buffer[0], SAMPLES_IN_BUFFER); //Set SAADC buffer 1. The SAADC will start to write to this buffer
     APP_ERROR_CHECK(err_code);
 
     // err_code = nrf_drv_saadc_buffer_convert(m_buffer[1], SAMPLES_IN_BUFFER); //Set SAADC buffer 2. The SAADC will write to this buffer when buffer 1 is full. This will give the applicaiton time to process data in buffer 1.
     // APP_ERROR_CHECK(err_code);
-    
+
     err_code = nrf_drv_saadc_sample();
     APP_ERROR_CHECK(err_code);
 
@@ -173,10 +174,14 @@ void ADC_Task(void)
     {
         ret_code_t err_code;
         // nrf_drv_saadc_sample();
-        err_code = BLECB_ADCChange(m_conn_handle, &m_cb, u8pinvalue);
-        NRF_LOG_INFO("adc = %d",pir_adc_value);
-        // err_code = BLECB_ADCChange(m_conn_handle, &m_cb, pir_sensitivity);
-        BLECB_CheckError(err_code);
+        adc_time_send++;
+        if (adc_time_send == 1000)
+        {
+            err_code = BLECB_ADCChange(m_conn_handle, &m_cb, u8pinvalue);
+            // NRF_LOG_INFO("adc = %d",pir_adc_value);
+            // err_code = BLECB_ADCChange(m_conn_handle, &m_cb, pir_sensitivity);
+            BLECB_CheckError(err_code);
+        }
         ADC_DeinitDriver(); // gui xong du lieu ADC, tat ADC driver de tiet kiem nang luong
     }
 }
