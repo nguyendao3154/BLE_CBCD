@@ -21,12 +21,35 @@
 #include "sdk_common.h"
 #include "cambien_service.h"
 #include "ble_srv_common.h"
+#define PIR_MAX_SENSITIVITY 8
+#define PIR_MIN_SENSITIVITY 1
 
-uint32_t BLECB_Init(ble_cb_t *p_cb)
+extern uint8_t pir_sensitivity;
+
+void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt)
+{
+    ble_gatts_evt_write_t const *p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
+
+    if
+        //  (p_evt_write->handle == p_cb->pir_write_char_handles.value_handle)
+        (p_evt_write->len == 1)
+        //(p_cb->pir_write_handler != NULL)
+
+        if ((p_evt_write->data[0] > PIR_MIN_SENSITIVITY - 1) && (p_evt_write->data[0] < PIR_MAX_SENSITIVITY + 1))
+        {
+        pir_sensitivity = p_evt_write->data[0];
+        // nrf_gpio_pin_toggle(25);
+        }
+
+}
+
+uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init)
 {
     uint32_t err_code;
     ble_uuid_t ble_uuid;
     ble_add_char_params_t add_char_params;
+
+    // p_cb->pir_write_handler = p_cb_init->pir_write_handler;
 
     // Add service.
     ble_uuid128_t base_uuid = {CB_UUID_BASE};
@@ -38,26 +61,6 @@ uint32_t BLECB_Init(ble_cb_t *p_cb)
 
     err_code = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY, &ble_uuid, &p_cb->service_handle);
     VERIFY_SUCCESS(err_code);
-
-    // Add chuyen dong characteristic.
-    memset(&add_char_params, 0, sizeof(add_char_params));
-    add_char_params.uuid = CB_UUID_PIR_CHAR;
-    add_char_params.uuid_type = p_cb->uuid_type;
-    add_char_params.init_len = sizeof(uint8_t);
-    add_char_params.max_len = sizeof(uint8_t);
-    add_char_params.char_props.read = 1;
-    add_char_params.char_props.notify = 1;
-
-    add_char_params.read_access = SEC_OPEN;
-    add_char_params.cccd_write_access = SEC_OPEN;
-
-    err_code = characteristic_add(p_cb->service_handle,
-                                  &add_char_params,
-                                  &p_cb->pir_char_handles);
-    if (err_code != NRF_SUCCESS)
-    {
-        return err_code;
-    }
 
     // Add magnetic characteristic.
     memset(&add_char_params, 0, sizeof(add_char_params));
@@ -78,7 +81,46 @@ uint32_t BLECB_Init(ble_cb_t *p_cb)
     {
         return err_code;
     }
+    // Add chuyen dong characteristic.
+    memset(&add_char_params, 0, sizeof(add_char_params));
+    add_char_params.uuid = CB_UUID_PIR_CHAR;
+    add_char_params.uuid_type = p_cb->uuid_type;
+    add_char_params.init_len = sizeof(uint8_t);
+    add_char_params.max_len = sizeof(uint8_t);
+    add_char_params.char_props.read = 1;
+    add_char_params.char_props.notify = 1;
 
+    add_char_params.read_access = SEC_OPEN;
+    add_char_params.cccd_write_access = SEC_OPEN;
+
+    err_code = characteristic_add(p_cb->service_handle,
+                                  &add_char_params,
+                                  &p_cb->pir_char_handles);
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
+
+    // Add Write PIR characteristic.
+    memset(&add_char_params, 0, sizeof(add_char_params));
+    add_char_params.uuid = CB_UUID_PIR_WRITE_CHAR;
+    add_char_params.uuid_type = p_cb->uuid_type;
+    add_char_params.init_len = sizeof(uint8_t);
+    add_char_params.max_len = sizeof(uint8_t);
+    add_char_params.char_props.read = 1;
+    add_char_params.char_props.write = 1;
+
+    add_char_params.read_access = SEC_OPEN;
+    add_char_params.write_access = SEC_OPEN;
+
+    err_code = characteristic_add(p_cb->service_handle,
+                                  &add_char_params,
+                                  &p_cb->pir_write_char_handles);
+
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
     // Add ADC characteristic.
     memset(&add_char_params, 0, sizeof(add_char_params));
     add_char_params.uuid = CB_UUID_ADC_CHAR;

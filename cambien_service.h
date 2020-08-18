@@ -37,9 +37,17 @@ extern "C"
 #define CB_UUID_SERVICE 0x1234
 #define CB_UUID_MAGNETIC_CHAR 0x1235
 #define CB_UUID_PIR_CHAR 0x1236
+#define CB_UUID_PIR_WRITE_CHAR 0x1237
 #define CB_UUID_ADC_CHAR 0x1238
 
     typedef struct ble_cb_s ble_cb_t;
+
+typedef void (*ble_cb_pir_write_handler_t) (uint16_t conn_handle, ble_cb_t * p_cb, uint8_t new_state);
+
+typedef struct
+{
+    ble_cb_pir_write_handler_t pir_write_handler; /**< Event handler to be called when the LED Characteristic is written. */
+} ble_cb_init_t;
 
     struct ble_cb_s
     {
@@ -47,10 +55,12 @@ extern "C"
         ble_gatts_char_handles_t magnetic_char_handles;
         ble_gatts_char_handles_t pir_char_handles;
         ble_gatts_char_handles_t ADC_char_handles;
+        ble_gatts_char_handles_t pir_write_char_handles;
+        ble_cb_pir_write_handler_t pir_write_handler;
         uint8_t uuid_type;
     };
 
-    uint32_t BLECB_Init(ble_cb_t *p_cb);
+    uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init);
 
     uint32_t BLECB_MagneticChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t magnetic_state);
 
@@ -59,6 +69,8 @@ extern "C"
     uint32_t BLECB_ADCChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t adc_hex_val);
 
     void BLECB_CheckError(ret_code_t err_code);
+
+    void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt);
 #ifdef __cplusplus
 }
 #endif

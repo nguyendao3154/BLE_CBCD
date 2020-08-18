@@ -36,14 +36,15 @@
 #include "app_adc.h"
 #include "ble_dis_c.h"
 #include "app_sensor.h"
+#include "cambien_service.h"
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#define DEVICE_NAME "MKP PIR Sensor" /**< Name of device. Will be included in the advertising data. */
-#define MODEL_NUMBER "MKP_PIR_0001"
-#define SERIAL_NUMBER "PIR_00000001"
+#define DEVICE_NAME "Test write" /**< Name of device. Will be included in the advertising data. */
+#define MODEL_NUMBER "MKP_DOOR_0001"
+#define SERIAL_NUMBER "DOOR_00000001"
 #define MANUFACTURER_NAME "Makihome"
 #define APP_BLE_OBSERVER_PRIO 3                                /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG 1                                 /**< A tag identifying the SoftDevice BLE configuration. */
@@ -67,7 +68,7 @@ extern "C"
     void BLE_AdvertisingInit(ble_cb_t *p_cb);
 
     void BLE_ServicesInit(ble_cb_t *p_cb);
-
+    
     void BLE_OnConnParamsEvt(ble_conn_params_evt_t *p_evt);
 
     void BLE_ConnParamsErrorHandler(uint32_t nrf_error);

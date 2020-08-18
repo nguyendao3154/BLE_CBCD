@@ -78,7 +78,11 @@ void BLE_ServicesInit(ble_cb_t *p_cb)
 {
     uint32_t err_code;
     ble_dis_init_t dis_init;
-    err_code = BLECB_Init(p_cb);
+    ble_cb_init_t init = {0};
+    
+    // init.pir_write_handler = pir_write_handler;
+    err_code = BLECB_Init(p_cb,  &init);
+    
     APP_ERROR_CHECK(err_code);
 
     memset(&dis_init, 0, sizeof(dis_init));
@@ -187,7 +191,7 @@ void BLE_AdvertisingStart(void)
 void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
 {
     ret_code_t err_code;
-
+    ble_cb_t * p_cb = (ble_cb_t *)p_context;
     switch (p_ble_evt->header.evt_id)
     {
     case BLE_GAP_EVT_CONNECTED:
@@ -222,6 +226,10 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
                                                NULL);
         APP_ERROR_CHECK(err_code);
         break;
+
+    case BLE_GATTS_EVT_WRITE:
+            on_write(p_cb, p_ble_evt);
+            break;    
 
     case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
     {

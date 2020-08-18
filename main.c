@@ -9,6 +9,7 @@
 #include "app_led.h"
 #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
+uint8_t pir_sensitivity;
 // bool m_saadc_initialized = false;
 // volatile uint8_t u8pinvalue;
 
@@ -48,12 +49,12 @@ void power_management_init(void)
 int main(void)
 {
     // Initialize.
-    // log_init();
+    log_init();
     timers_init();
     power_management_init();
     SENSOR_InterruptInit();
     SENSOR_MagneticGetInitialValue();
-    ADC_Init();
+		ADC_Init();
     BLE_StackInit();
 		sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
     BLE_GapParamsInit();
@@ -63,19 +64,20 @@ int main(void)
     BLE_ConnParamsInit();
     BLE_AdvertisingStart();
     LED_Config();
-    nrf_drv_saadc_sample();
+    nrf_gpio_pin_clear(25);
+    // nrf_drv_saadc_sample();
 		//ADC_DeinitDriver();
     // Start execution.
-    //NRF_LOG_INFO("CBCD started.");
-    // Enter main loop.
+    NRF_LOG_INFO("CBCD started.");
+    // Enter main loop./
     for (;;)
     {
 	
-        //SENSOR_MagneticTask();
+        // SENSOR_MagneticTask();
         SENSOR_PIR_Task();
         ADC_Task();
-        LED_Task();
-        //NRF_LOG_FLUSH();
+        // LED_Task();
+        NRF_LOG_FLUSH();
         nrf_pwr_mgmt_run();
     }
 }

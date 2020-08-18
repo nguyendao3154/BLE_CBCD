@@ -38,16 +38,6 @@ void SENSOR_MagneticGetInitialValue(void);
 
 void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
-void SENSOR_MagneticInit(void);
-
-void SENSOR_PIR_Out1Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
-
-void SENSOR_PIR_OUT1Init(void);
-
-void SENSOR_PIR_Out2Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
-
-void SENSOR_PIR_OUT2Init(void);
-
 void SENSOR_InterruptInit(void);
 
 void SENSOR_MagneticTask(void);
@@ -58,6 +48,7 @@ void SENSOR_CreateTimer(void);
 
 void SENSOR_TickCount(void *p_context);
 
+void SENSOR_PIR_Software_Reg(void); 
 #endif /* APP_SENSOR_H */
 
 /**

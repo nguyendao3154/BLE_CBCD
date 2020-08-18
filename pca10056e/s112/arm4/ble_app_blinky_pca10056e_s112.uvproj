@@ -546,11 +546,6 @@
               <FilePath>..\..\..\BLE_spec.c</FilePath>
             </File>
             <File>
-              <FileName>cambien_service.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\cambien_service.c</FilePath>
-            </File>
-            <File>
               <FileName>app_sensor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\app_sensor.c</FilePath>
@@ -559,6 +554,16 @@
               <FileName>app_led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\app_led.c</FilePath>
+            </File>
+            <File>
+              <FileName>cambien_service.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\cambien_service.c</FilePath>
+            </File>
+            <File>
+              <FileName>cambien_service.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\cambien_service.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -4014,11 +4019,6 @@
               <FilePath>..\..\..\BLE_spec.c</FilePath>
             </File>
             <File>
-              <FileName>cambien_service.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\cambien_service.c</FilePath>
-            </File>
-            <File>
               <FileName>app_sensor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\app_sensor.c</FilePath>
@@ -4027,6 +4027,16 @@
               <FileName>app_led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\app_led.c</FilePath>
+            </File>
+            <File>
+              <FileName>cambien_service.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\cambien_service.c</FilePath>
+            </File>
+            <File>
+              <FileName>cambien_service.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\cambien_service.h</FilePath>
             </File>
           </Files>
         </Group>
