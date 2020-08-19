@@ -33,14 +33,13 @@ void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt)
     if
         //  (p_evt_write->handle == p_cb->pir_write_char_handles.value_handle)
         (p_evt_write->len == 1)
-        //(p_cb->pir_write_handler != NULL)
-
+    //(p_cb->pir_write_handler != NULL)
+    {
         if ((p_evt_write->data[0] > PIR_MIN_SENSITIVITY - 1) && (p_evt_write->data[0] < PIR_MAX_SENSITIVITY + 1))
         {
-        pir_sensitivity = p_evt_write->data[0];
-        // nrf_gpio_pin_toggle(25);
+            pir_sensitivity = p_evt_write->data[0];
         }
-
+    }
 }
 
 uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init)

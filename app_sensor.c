@@ -19,7 +19,7 @@
   ******************************************************************************/
 #include "app_sensor.h"
 
-// #define PIR_HARDWARE_CALIB
+#define PIR_HARDWARE_CALIB
 
 #define PIR_TIMEOUT 100 // 10s
 #define PIR_INTERVAL_SCALE 50
@@ -206,17 +206,21 @@ void SENSOR_PIR_Task(void)
     {
         pir_task_state = 1;
         numsof100ticks_pir = sensor_ticks;
-        request_led_on = true;
+
         //NRF_LOG_INFO("task 1");
     }
     if (pir_task_pre_state != pir_task_state)
     {
-        err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_task_state);
+        if (pir_task_state == 1)
+        {
+            request_led_on = true;
+        }
+        err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_task_state);  
         BLECB_CheckError(err_code);
     }
     //NRF_LOG_INFO("%d\n", numsof1000ticks_pir);
     // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_logic_level, pir_task_pre_state, pir_task_state);
-    pir_task_pre_state = pir_task_state;
+    pir_task_pre_state = pir_task_state; 
 }
 
 void SENSOR_TickCount(void *p_context) // 100 ms

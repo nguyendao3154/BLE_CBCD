@@ -73,12 +73,13 @@ int main(void)
     for (;;)
     {
 	
-        // SENSOR_MagneticTask();
+        //SENSOR_MagneticTask();
         SENSOR_PIR_Task();
         ADC_Task();
         LED_Task();
         // NRF_LOG_FLUSH();
         nrf_pwr_mgmt_run();
+				//sd_power_system_off();
     }
 }
 

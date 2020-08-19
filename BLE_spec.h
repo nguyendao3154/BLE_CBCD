@@ -42,7 +42,7 @@ extern "C"
 {
 #endif
 
-#define DEVICE_NAME "MKP PIR Sensor" /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME "Test energy" /**< Name of device. Will be included in the advertising data. */
 #define MODEL_NUMBER "MKP_PIR_0001"
 #define SERIAL_NUMBER "PIR_00000001"
 #define MANUFACTURER_NAME "Makihome"
