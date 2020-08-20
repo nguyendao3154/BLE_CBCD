@@ -174,11 +174,12 @@ void ADC_Task(void)
     {
         ret_code_t err_code;
         // nrf_drv_saadc_sample();
+			  NRF_LOG_INFO("adc = %d",pir_adc_value);
         adc_time_send++;
         if (adc_time_send == 1000)
         {
             err_code = BLECB_ADCChange(m_conn_handle, &m_cb, u8pinvalue);
-            // NRF_LOG_INFO("adc = %d",pir_adc_value);
+            
             // err_code = BLECB_ADCChange(m_conn_handle, &m_cb, pir_sensitivity);
             BLECB_CheckError(err_code);
         }
