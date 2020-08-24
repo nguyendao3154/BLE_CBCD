@@ -19,7 +19,7 @@
   ******************************************************************************/
 #include "app_sensor.h"
 
-#define PIR_HARDWARE_CALIB
+// #define PIR_HARDWARE_CALIB
 
 #define PIR_TIMEOUT 100 // 10s
 #define PIR_INTERVAL_SCALE 50
@@ -79,6 +79,7 @@ void SENSOR_PIR_Software_Reg(void)
     {
         pir_logic_level = 1;
         // NRF_LOG_INFO("%d", (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity));
+                //    NRF_LOG_INFO("adc = %d",pir_adc_value);
     }
     else
     {
@@ -216,7 +217,8 @@ void SENSOR_PIR_Task(void)
             request_led_on = true;
         }
         err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_task_state);  
-				NRF_LOG_INFO("GUI DU LIEU");
+			//	NRF_LOG_INFO("GUI DU LIEU");
+     
         BLECB_CheckError(err_code);
     }
     //NRF_LOG_INFO("%d\n", numsof1000ticks_pir);

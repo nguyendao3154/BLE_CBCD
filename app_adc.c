@@ -174,7 +174,7 @@ void ADC_Task(void)
     {
         ret_code_t err_code;
         // nrf_drv_saadc_sample();
-			  NRF_LOG_INFO("adc = %d",pir_adc_value);
+			  //NRF_LOG_INFO("adc = %d",pir_adc_value);
         adc_time_send++;
         if (adc_time_send == 1000)
         {
