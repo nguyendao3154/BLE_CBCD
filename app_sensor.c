@@ -19,7 +19,7 @@
   ******************************************************************************/
 #include "app_sensor.h"
 
-#define PIR_HARDWARE_CALIB
+//#define PIR_HARDWARE_CALIB
 
 #define PIR_TIMEOUT 100 // 10s
 #define PIR_INTERVAL_SCALE 50
@@ -78,7 +78,7 @@ void SENSOR_PIR_Software_Reg(void)
     if ((pir_adc_value < (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity)) || (pir_adc_value > (pir_offset_value[1] - PIR_INTERVAL_SCALE * pir_sensitivity)))
     {
         pir_logic_level = 1;
-        // NRF_LOG_INFO("%d", (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity));
+        //NRF_LOG_INFO("%d", (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity));
     }
     else
     {
