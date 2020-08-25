@@ -25,7 +25,7 @@
 #define BAT_NUMBER_CHANNEL 4
 
 #define LDR_NUMBER_CHANNEL 6
-#define ADC_TIME_SCAN 200 // ADC quet 1 ngay 1 lan
+#define ADC_TIME_SCAN 100 // ADC quet 1 ngay 1 lan
 
 #define ADC_RESOLUTION 4095
 #define TEN_TIMES_V_REF 6
@@ -45,7 +45,7 @@ extern ble_cb_t m_cb;
 extern uint8_t pir_sensitivity;
 
 APP_TIMER_DEF(m_adc_id);
-static nrf_saadc_value_t m_buffer[1][SAMPLES_IN_BUFFER];
+static nrf_saadc_value_t m_buffer[2][SAMPLES_IN_BUFFER];
 static uint32_t u32PinValue;
 
 /**
@@ -54,7 +54,7 @@ static uint32_t u32PinValue;
 void ADC_DeinitDriver(void)
 {
     // NRF_LOG_INFO("Off");
-    nrf_drv_saadc_is_busy();
+    //nrf_drv_saadc_is_busy();
     nrf_drv_saadc_uninit();                                                     //Unintialize SAADC to disable EasyDMA and save power
     NRF_SAADC->INTENCLR = (SAADC_INTENCLR_END_Clear << SAADC_INTENCLR_END_Pos); //Disable the SAADC interrupt
     NVIC_ClearPendingIRQ(SAADC_IRQn);
@@ -63,6 +63,7 @@ void ADC_DeinitDriver(void)
 
 void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
 {
+    // NRF_LOG_INFO("callback");
     if (p_event->type == NRF_DRV_SAADC_EVT_DONE)
     {
         ret_code_t err_code;
@@ -80,19 +81,18 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
          * Battery 3V
          * Gain 0.18
          */
-        u32PinValue = (p_event->data.done.p_buffer[1]) * TEN_TIMES_V_REF * 100 * ADC_GAIN_SOFTWARE / HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
+        // u32PinValue = (p_event->data.done.p_buffer[1]) * TEN_TIMES_V_REF * 100 * ADC_GAIN_SOFTWARE / HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
+        u32PinValue = 100 - ((1000 - (p_event->data.done.p_buffer[1]))/5);
         u8pinvalue = (uint8_t)u32PinValue;
-        // u8pinvalue = (p_event->data.done.p_buffer[1])/10;
-        //  NRF_LOG_INFO("%d %d %d\r\n", (p_event->data.done.p_buffer[0]), (p_event->data.done.p_buffer[1]), (p_event->data.done.p_buffer[2]));
-        // NRF_LOG_INFO("%d\r\n", (p_event->data.done.p_buffer[1]));
-        // NRF_LOG_INFO("%d\r\n", (p_event->data.done.p_buffer[2]));
         pir_adc_value = (p_event->data.done.p_buffer[0]) * 100 / HUNDRED_TIMES_ADC_GAIN_HARDWARE;
         ldr_adc_value = (p_event->data.done.p_buffer[2]);
         //Clear the SAADC interrupt if set
+        ADC_DeinitDriver(); // gui xong du lieu ADC, tat ADC driver de tiet kiem nang luong
     }
 }
 void ADC_Init(void)
 {
+    // NRF_LOG_INFO("init");
     ret_code_t err_code;
     nrf_drv_saadc_config_t saadc_config;
     nrf_saadc_channel_config_t channel_config_1;
@@ -103,7 +103,7 @@ void ADC_Init(void)
     saadc_config.resolution = NRF_SAADC_RESOLUTION_12BIT;    //Set SAADC resolution to 12-bit. This will make the SAADC output values from 0 (when input voltage is 0V) to 2^12=2048 (when input voltage is 3.6V for channel gain setting of 1/6).
     saadc_config.oversample = NRF_SAADC_OVERSAMPLE_DISABLED; //Set oversample to disabled (will give unwanted output with scan mode).
     saadc_config.interrupt_priority = APP_IRQ_PRIORITY_LOW;  //Set SAADC interrupt to low priority.
-
+    saadc_config.low_power_mode = true;
     //Initialize SAADC
     err_code = nrf_drv_saadc_init(&saadc_config, ADC_CallBack); //Initialize the SAADC with configuration and callback function. The application must then implement the saadc_callback function, which will be called when SAADC interrupt is triggered
     APP_ERROR_CHECK(err_code);
@@ -136,7 +136,6 @@ void ADC_Init(void)
     err_code = nrf_drv_saadc_channel_init(BAT_NUMBER_CHANNEL, &channel_config_2);
     APP_ERROR_CHECK(err_code);
 
-
     //Configure SAADC channel
     channel_config_3.reference = NRF_SAADC_REFERENCE_INTERNAL; //Set internal reference of fixed 0.6 volts
     channel_config_3.gain = NRF_SAADC_GAIN1_4;                 //Set input gain to 1/6. The maximum SAADC input voltage is then 0.6V/(1/6)=3.6V. The single ended input range is then 0V-3.6V
@@ -148,17 +147,15 @@ void ADC_Init(void)
     channel_config_3.resistor_n = NRF_SAADC_RESISTOR_DISABLED; //Disable pulldown resistor on the input pin
     channel_config_3.burst = NRF_SAADC_BURST_DISABLED;
 
-     err_code = nrf_drv_saadc_channel_init(LDR_NUMBER_CHANNEL, &channel_config_3);
-     APP_ERROR_CHECK(err_code);
+    err_code = nrf_drv_saadc_channel_init(LDR_NUMBER_CHANNEL, &channel_config_3);
+    APP_ERROR_CHECK(err_code);
 
     err_code = nrf_drv_saadc_buffer_convert(m_buffer[0], SAMPLES_IN_BUFFER); //Set SAADC buffer 1. The SAADC will start to write to this buffer
     APP_ERROR_CHECK(err_code);
 
-    // err_code = nrf_drv_saadc_buffer_convert(m_buffer[1], SAMPLES_IN_BUFFER); //Set SAADC buffer 2. The SAADC will write to this buffer when buffer 1 is full. This will give the applicaiton time to process data in buffer 1.
-    // APP_ERROR_CHECK(err_code);
-
-    err_code = nrf_drv_saadc_sample();
+    err_code = nrf_drv_saadc_buffer_convert(m_buffer[1], SAMPLES_IN_BUFFER); //Set SAADC buffer 2. The SAADC will write to this buffer when buffer 1 is full. This will give the applicaiton time to process data in buffer 1.
     APP_ERROR_CHECK(err_code);
+    nrf_drv_saadc_sample();
 
     is_ADC_initialized = true;
 }
@@ -191,23 +188,24 @@ void ADC_CreateTimer(void)
 
 void ADC_Task(void)
 {
+
     if (is_ADC_initialized)
     {
         ret_code_t err_code;
-        // nrf_drv_saadc_sample();
-			  NRF_LOG_INFO("%d",pir_adc_value);
-              NRF_LOG_INFO("%d",u8pinvalue);
-              NRF_LOG_INFO("%d",ldr_adc_value);
+
+          NRF_LOG_INFO("%d",u8pinvalue);
+        // //   NRF_LOG_INFO("fd");
+        //   NRF_LOG_INFO("%d",ldr_adc_value);
 
         adc_time_send++;
         if (adc_time_send == 1000)
         {
             err_code = BLECB_ADCChange(m_conn_handle, &m_cb, u8pinvalue);
-            
+
             // err_code = BLECB_ADCChange(m_conn_handle, &m_cb, pir_sensitivity);
             BLECB_CheckError(err_code);
         }
-        ADC_DeinitDriver(); // gui xong du lieu ADC, tat ADC driver de tiet kiem nang luong
+        //
     }
 }
 
