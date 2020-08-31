@@ -40,7 +40,7 @@ ble_gap_adv_data_t m_adv_data =
             }};
             
 extern ble_cb_t m_cb;
-extern volatile uint8_t u8pinvalue;
+extern volatile uint8_t cell_percent;   
 extern volatile uint8_t pir_task_state;
 extern volatile uint8_t magnetic_logic_level;
 
@@ -198,7 +198,7 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
         NRF_LOG_INFO("Connected");
         m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
 
-        err_code = BLECB_ADCChange(m_conn_handle, &m_cb, u8pinvalue);
+        err_code = BLECB_ADCChange(m_conn_handle, &m_cb, cell_percent);
 
         BLECB_CheckError(err_code);
 

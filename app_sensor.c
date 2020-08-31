@@ -217,7 +217,7 @@ void SENSOR_PIR_Task(void)
             request_led_on = true;
         }
         err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_task_state);  
-			//	NRF_LOG_INFO("GUI DU LIEU");
+				NRF_LOG_INFO("GUI DU LIEU");
      
         BLECB_CheckError(err_code);
     }
