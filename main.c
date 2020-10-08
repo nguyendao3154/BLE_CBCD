@@ -14,7 +14,10 @@ uint8_t pir_sensitivity;
 // volatile uint8_t u8pinvalue;
 
 NRF_BLE_GATT_DEF(m_gatt); /**< GATT module instance. */
-ble_cb_t m_cb;
+ble_cb_t m_cb;                         \
+    NRF_SDH_BLE_OBSERVER(m_ble_observer,              \
+                         BLE_CB_BLE_OBSERVER_PRIO, \
+                         ble_cb_on_ble_evt, &m_cb);
 
 static void timers_init(void)
 {

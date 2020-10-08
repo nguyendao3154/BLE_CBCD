@@ -22,7 +22,7 @@
 #include "SEGGER_RTT_Conf.h"
 
 uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**< Handle of the current connection. */
-
+extern bool request_led_on;
 uint8_t m_adv_handle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;           /**< Advertising handle used to identify an advertising set. */
 uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buffer for storing an encoded advertising set. */
 uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
@@ -38,9 +38,9 @@ ble_gap_adv_data_t m_adv_data =
                 .len = BLE_GAP_ADV_SET_DATA_SIZE_MAX
 
             }};
-            
+
 extern ble_cb_t m_cb;
-extern volatile uint8_t cell_percent;   
+extern volatile uint8_t cell_percent;
 extern volatile uint8_t pir_task_state;
 extern volatile uint8_t magnetic_logic_level;
 
@@ -79,10 +79,10 @@ void BLE_ServicesInit(ble_cb_t *p_cb)
     uint32_t err_code;
     ble_dis_init_t dis_init;
     ble_cb_init_t init = {0};
-    
+
     // init.pir_write_handler = pir_write_handler;
-    err_code = BLECB_Init(p_cb,  &init);
-    
+    err_code = BLECB_Init(p_cb, &init);
+
     APP_ERROR_CHECK(err_code);
 
     memset(&dis_init, 0, sizeof(dis_init));
@@ -91,7 +91,7 @@ void BLE_ServicesInit(ble_cb_t *p_cb)
 
     ble_srv_ascii_to_utf8(&dis_init.model_num_str, (char *)MODEL_NUMBER);
 
-    ble_srv_ascii_to_utf8(&dis_init.serial_num_str, (char*)SERIAL_NUMBER);
+    ble_srv_ascii_to_utf8(&dis_init.serial_num_str, (char *)SERIAL_NUMBER);
 
     dis_init.dis_char_rd_sec = SEC_OPEN;
 
@@ -149,7 +149,7 @@ void BLE_AdvertisingInit(ble_cb_t *p_cb)
 
     err_code = sd_ble_gap_adv_set_configure(&m_adv_handle, &m_adv_data, &adv_params);
     APP_ERROR_CHECK(err_code);
-    err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV , m_adv_handle, 4);
+    err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, m_adv_handle, 4);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -191,7 +191,7 @@ void BLE_AdvertisingStart(void)
 void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
 {
     ret_code_t err_code;
-    ble_cb_t * p_cb = (ble_cb_t *)p_context;
+    ble_cb_t *p_cb = (ble_cb_t *)p_context;
     switch (p_ble_evt->header.evt_id)
     {
     case BLE_GAP_EVT_CONNECTED:
@@ -227,9 +227,9 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
         APP_ERROR_CHECK(err_code);
         break;
 
-    case BLE_GATTS_EVT_WRITE:
-            on_write(p_cb, p_ble_evt);
-            break;    
+    // case BLE_GATTS_EVT_WRITE:
+    //     on_write(p_cb, p_ble_evt);
+    //     break;
 
     case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
     {

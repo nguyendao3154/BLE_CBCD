@@ -39,14 +39,18 @@ extern "C"
 #define CB_UUID_PIR_CHAR 0x1236
 #define CB_UUID_PIR_WRITE_CHAR 0x1237
 #define CB_UUID_ADC_CHAR 0x1238
+#define CB_UUID_LDR_WRITE_CHAR 0x1239
 
     typedef struct ble_cb_s ble_cb_t;
 
 typedef void (*ble_cb_pir_write_handler_t) (uint16_t conn_handle, ble_cb_t * p_cb, uint8_t new_state);
+typedef void (*ble_cb_ldr_write_handler_t) (uint16_t conn_handle, ble_cb_t * p_cb, uint8_t new_state);
 
 typedef struct
 {
-    ble_cb_pir_write_handler_t pir_write_handler; /**< Event handler to be called when the LED Characteristic is written. */
+    ble_cb_pir_write_handler_t pir_write_handler; /**< Event handler to be called when the PIR Characteristic is written. */
+    ble_cb_ldr_write_handler_t ldr_write_handler; /**< Event handler to be called when the LDR Characteristic is written. */
+
 } ble_cb_init_t;
 
     struct ble_cb_s
@@ -56,9 +60,18 @@ typedef struct
         ble_gatts_char_handles_t pir_char_handles;
         ble_gatts_char_handles_t ADC_char_handles;
         ble_gatts_char_handles_t pir_write_char_handles;
+        ble_gatts_char_handles_t ldr_write_char_handles;
         ble_cb_pir_write_handler_t pir_write_handler;
+        ble_cb_ldr_write_handler_t ldr_write_handler;
         uint8_t uuid_type;
     };
+
+typedef enum{
+    PIR_MAX_SENSITIVITY = 8;
+    PIR_MIN_SENSITIVITY = 1;
+    LDR_MAX_SENSITIVITY = 8;
+    LDR_MIN_SENSITIVITY = 1;
+}write_sensitivity;
 
     uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init);
 
@@ -69,6 +82,8 @@ typedef struct
     uint32_t BLECB_ADCChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t adc_hex_val);
 
     void BLECB_CheckError(ret_code_t err_code);
+
+    void ble_cb_on_ble_evt(ble_evt_t const * p_ble_evt, void * p_context);
 
     void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt);
 #ifdef __cplusplus

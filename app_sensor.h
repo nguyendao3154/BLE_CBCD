@@ -34,6 +34,10 @@
 #define PIR_OUT1_PIN 9
 #define PIR_OUT2_PIN 10
 
+typedef struct{
+    uint8_t current_state;
+    uint8_t previous_state;
+}sensor_state_t;
 void SENSOR_MagneticGetInitialValue(void);
 
 void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
