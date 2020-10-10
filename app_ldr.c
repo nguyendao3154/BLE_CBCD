@@ -42,6 +42,7 @@ ldr_param_t ldr_state =
         .current_state = 0
 
 };
+ 
 
 void LDR_receive()
 {
