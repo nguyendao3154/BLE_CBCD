@@ -2,3 +2,12 @@
 *.ewp
 *.o
 *.crf
+pca10056e/s112/arm4/ble_app_blinky_pca10056e_s112.uvproj
+pca10056e/s112/arm4/ble_app_blinky_pca10056e_s112.uvopt
+pca10056e/s112/arm4/ble_app_blinky_pca10056e_s112.uvgui.Nguyen
+pca10056e/s112/arm4/_build/nrf52811_xxaa.map
+pca10056e/s112/arm4/_build/nrf52811_xxaa.htm
+pca10056e/s112/arm4/_build/nrf52811_xxaa.hex
+pca10056e/s112/arm4/_build/nrf52811_xxaa.build_log.htm
+pca10056e/s112/arm4/_build/nrf52811_xxaa.axf
+pca10056e/s112/arm4/_build/ble_app_blinky_pca10056e_s112_nrf52811_xxaa.dep
