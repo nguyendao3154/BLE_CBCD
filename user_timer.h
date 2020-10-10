@@ -24,7 +24,7 @@
 #include "BLE_spec.h"
 #include "app_led.h"
 
-void TickCount(void *p_context);
+void TimerHandle(void *p_context);
 
 void User_CreateTimer(void);
 

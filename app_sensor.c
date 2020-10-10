@@ -43,16 +43,12 @@ extern uint16_t pir_adc_value;
 
 uint16_t pir_offset_value[2] = {1425, 2525};
 bool magnetic_flag = false;
-uint8_t pir_logic_level;
-uint32_t numsof100ticks_pir;
-uint32_t door_current_ticks;
-uint32_t door_previous_ticks;
 
 
-sensor_state_t pir_state = {
+sensor_param_t pir_state = {
     .current_state = 1
 };
-sensor_state_t door_state = {
+sensor_param_t door_state = {
     .previous_state = DEFAULT_MAGNETIC_STATE
 };
 
@@ -63,7 +59,7 @@ void SENSOR_MagneticGetInitialValue(void)
 void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
     magnetic_flag = true;
-    door_current_ticks = g_systick;
+    door_state.current_tick = g_systick;
 
     if (!nrf_gpio_pin_read(MAGNETIC_PIN))
     {
@@ -83,13 +79,13 @@ void SENSOR_PIR_Software_Reg(void)
 {
     if ((pir_adc_value < (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity)) || (pir_adc_value > (pir_offset_value[1] - PIR_INTERVAL_SCALE * pir_sensitivity)))
     {
-        pir_logic_level = 1;
+        pir_state.current_logic = 1;
         // NRF_LOG_INFO("%d", (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity));
                 //    NRF_LOG_INFO("adc = %d",pir_adc_value);
     }
     else
     {
-        pir_logic_level = 0;
+        pir_state.current_logic = 0;
     }
 }
 
@@ -111,12 +107,12 @@ void SENSOR_PIR_Out1Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 {
     if (nrf_gpio_pin_read(PIR_OUT1_PIN))
     {
-        pir_logic_level = 1;
+        pir_state.current_logic = 1;
         // NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
-        pir_logic_level = 0;
+        pir_state.current_logic = 0;
         //NRF_LOG_INFO("CD 0\r\n");
     }
 }
@@ -138,12 +134,12 @@ void SENSOR_PIR_Out2Handle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 {
     if (nrf_gpio_pin_read(PIR_OUT2_PIN))
     {
-        pir_logic_level = 1;
+        pir_state.current_logic = 1;
         // NRF_LOG_INFO("CD 1\r\n");
     }
     else
     {
-        pir_logic_level = 0;
+        pir_state.current_logic = 0;
         //NRF_LOG_INFO("CD 0\r\n");
     }
 }
@@ -177,9 +173,9 @@ void SENSOR_MagneticTask(void)
     if (magnetic_flag)
     {
         /* thay doi trang thai trong khoang thoi gian lon hon 0.3s */
-        if ((door_current_ticks - door_previous_ticks > DOOR_MINIMUM_INTERVAL) && (door_state.previous_state != door_state.current_state))
+        if ((door_state.current_tick - door_state.previous_tick > DOOR_MINIMUM_INTERVAL) && (door_state.previous_state != door_state.current_state))
         {
-            door_previous_ticks = door_current_ticks;
+            door_state.previous_tick = door_state.current_tick;
             err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, door_state.current_state);
             // NRF_LOG_INFO("Notify1");
             BLECB_CheckError(err_code);
@@ -187,9 +183,9 @@ void SENSOR_MagneticTask(void)
         }
     }
     /* lay trang thai cuoi cung neu thay doi trong thoi gian nho hon 0.3*/
-    if ((door_state.previous_state != door_state.current_state) && (g_systick - door_previous_ticks > DOOR_MAXIMUM_INTERVAL))
+    if ((door_state.previous_state != door_state.current_state) && (g_systick - door_state.previous_tick > DOOR_MAXIMUM_INTERVAL))
     {
-        door_previous_ticks = door_current_ticks;
+        door_state.previous_tick = door_state.current_tick;
         err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, door_state.current_state);
         // NRF_LOG_INFO("Notify2");
         BLECB_CheckError(err_code);
@@ -204,15 +200,15 @@ void SENSOR_PIR_Task(void)
 #endif
     ret_code_t err_code;
 
-    if ((g_systick - numsof100ticks_pir > PIR_TIMEOUT) && !pir_logic_level) // ko co chuyen dong trong PIR_TIMEOUT giay
+    if ((g_systick - pir_state.current_tick > PIR_TIMEOUT) && !pir_state.current_logic) // ko co chuyen dong trong PIR_TIMEOUT giay
     {
         pir_state.current_state = 0;
         //NRF_LOG_INFO("task 0");
     }
-    if (pir_logic_level) // co chuyen dong
+    if (pir_state.current_logic) // co chuyen dong
     {
         pir_state.current_state = 1;
-        numsof100ticks_pir = g_systick;
+        pir_state.current_tick = g_systick;
 
         //NRF_LOG_INFO("task 1");
     }
@@ -220,7 +216,7 @@ void SENSOR_PIR_Task(void)
     {
         if (pir_state.current_state == 1)
         {
-            // request_led_on = true;
+            request_led_on = true;
         }
         err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_state.current_state);  
 				NRF_LOG_INFO("GUI DU LIEU");
@@ -228,7 +224,7 @@ void SENSOR_PIR_Task(void)
         BLECB_CheckError(err_code);
     }
     //NRF_LOG_INFO("%d\n", numsof1000ticks_pir);
-    // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_logic_level, pir_task_pre_state, pir_task_state);
+    // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_state.current_logic, pir_task_pre_state, pir_task_state);
     pir_state.previous_state = pir_state.current_state; 
 }
 

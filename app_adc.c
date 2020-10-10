@@ -25,7 +25,7 @@
 #define BAT_NUMBER_CHANNEL 4
 
 #define LDR_NUMBER_CHANNEL 6
-#define ADC_TIME_SCAN 100 // ADC quet 1 ngay 1 lan
+
 
 #define ADC_RESOLUTION 4095
 #define TEN_TIMES_V_REF 6
@@ -37,7 +37,6 @@ uint16_t adc_time_send;
 uint16_t pir_adc_value;
 uint16_t ldr_adc_value;
 
-bool is_ADC_initialized = false;
 bool is_cell_adc_ready_to_sent = true;
 
 extern uint16_t m_conn_handle;                                          /**< Handle of the current connection. */
@@ -46,8 +45,8 @@ extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buf
 extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
 extern ble_cb_t m_cb;
 extern uint8_t pir_sensitivity;
+extern bool is_ADC_initialized;
 
-APP_TIMER_DEF(m_adc_id);
 static nrf_saadc_value_t m_buffer[2][SAMPLES_IN_BUFFER];
 
 uint16_t battery_adc_table[NUMBER_OF_CELL_ADC_POINT] = {615, 675, 830, 950};
@@ -166,32 +165,6 @@ void ADC_Init(void)
 
     is_ADC_initialized = true;
 }
-/**
- * @brief bat ADC bang timer
- */
-void ADC_HandleTimer(void *p_context)
-{
-    // NRF_LOG_INFO("handle");
-    if (!is_ADC_initialized)
-    {
-        ADC_Init(); //Initialize the SAADC. In the case when SAADC_SAMPLES_IN_BUFFER > 1 then we only need to initialize the SAADC when the the buffer is empty.
-    }
-}
-/**
- * @brief tao timer
- * ADC_TIME_SCAN: thoi gian giua moi lan ngat
- * ADC_HandleTimer: ham callback timer
- */
-void ADC_CreateTimer(void)
-{
-    ret_code_t err_code;
-    // Create timers
-    err_code = app_timer_create(&m_adc_id,
-                                APP_TIMER_MODE_REPEATED,
-                                ADC_HandleTimer);
-    APP_ERROR_CHECK(err_code);
-    APP_ERROR_CHECK(app_timer_start(m_adc_id, APP_TIMER_TICKS(ADC_TIME_SCAN), NULL));
-}
 
 void cell_calculate_and_send(void)
 {
@@ -228,7 +201,7 @@ void ADC_Task(void)
     {
         
         //NRF_LOG_INFO("%d", u16pinvalue);
-          NRF_LOG_INFO("%d",ldr_adc_value);
+          NRF_LOG_INFO("%d, %d, %d",ldr_adc_value, u16pinvalue, pir_adc_value);
         adc_time_send++;
         if (adc_time_send % 1000 == 0)
         {

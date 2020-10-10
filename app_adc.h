@@ -27,10 +27,6 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event);
 
 void ADC_Init(void);
 
-void ADC_CreateTimer(void);
-
-void ADC_HandleTimer(void *p_context);
-
 void ADC_Task(void);
 #endif
 

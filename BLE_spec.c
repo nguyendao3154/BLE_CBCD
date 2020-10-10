@@ -41,8 +41,8 @@ ble_gap_adv_data_t m_adv_data =
 
 extern ble_cb_t m_cb;
 extern volatile uint8_t cell_percent;
-extern volatile sensor_state_t pir_state;
-extern volatile sensor_state_t door_state;
+extern volatile sensor_param_t pir_state;
+extern volatile sensor_param_t door_state;
 
 void BLE_GapParamsInit(void)
 {

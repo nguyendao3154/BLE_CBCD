@@ -36,7 +36,10 @@
 typedef struct{
     uint8_t current_state;
     uint8_t previous_state;
-}sensor_state_t;
+    uint8_t current_logic;
+    uint32_t current_tick;
+    uint32_t previous_tick;
+}sensor_param_t;
 void SENSOR_MagneticGetInitialValue(void);
 
 void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
