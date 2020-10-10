@@ -23,6 +23,7 @@
 #include "app_timer.h"
 #include "BLE_spec.h"
 #include "app_led.h"
+#include "app_adc.h"
 
 void TimerHandle(void *p_context);
 

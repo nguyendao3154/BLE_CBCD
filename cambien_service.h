@@ -40,7 +40,6 @@ extern "C"
 #define CB_UUID_PIR_WRITE_CHAR 0x1237
 #define CB_UUID_ADC_CHAR 0x1238
 #define CB_UUID_LDR_WRITE_CHAR 0x1239
-#define CB_UUID_LDR_READ_CHAR 0x1240
 
     typedef struct ble_cb_s ble_cb_t;
 
@@ -84,6 +83,10 @@ typedef enum{
     uint32_t BLECB_ADCChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t adc_hex_val);
 
     uint32_t BLECB_LDRChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t ldr_hex_val);
+
+    uint32_t BLECB_PIRWriteChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t PIR_state);
+
+    uint32_t BLECB_LDRWriteChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t ldr_hex_val);
 
     void BLECB_CheckError(ret_code_t err_code);
 

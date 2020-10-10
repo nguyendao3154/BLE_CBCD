@@ -22,55 +22,28 @@
 #include "cambien_service.h"
 #include "ble_srv_common.h"
 
-
 extern uint8_t pir_sensitivity;
 extern uint8_t ldr_sensitivity;
 extern bool request_led_on;
-void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt)
-{
-    ble_gatts_evt_write_t const *p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
+extern uint16_t m_conn_handle;                                          /**< Handle of the current connection. */
+extern uint8_t m_adv_handle;                                            /**< Advertising handle used to identify an advertising set. */
+extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buffer for storing an encoded advertising set. */
+extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
+extern ble_cb_t m_cb;     
 
-    if
-         ((p_evt_write->handle == p_cb->pir_write_char_handles.value_handle) &&
-        (p_evt_write->len == 1))
-    //(p_cb->pir_write_handler != NULL)
-    {
-        request_led_on = true;
-        // p_cb->pir_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_cb, p_evt_write->data[0]);
-        if ((p_evt_write->data[0] > PIR_MIN_SENSITIVITY - 1) && (p_evt_write->data[0] < PIR_MAX_SENSITIVITY + 1))
-        {
-            pir_sensitivity = p_evt_write->data[0];
-            
-        }
-    }
-    if
-         ((p_evt_write->handle == p_cb->ldr_write_char_handles.value_handle) &&
-        (p_evt_write->len == 1))
-    //(p_cb->pir_write_handler != NULL)
-    {
-        request_led_on = true;
-        // p_cb->pir_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_cb, p_evt_write->data[0]);
-        if ((p_evt_write->data[0] > LDR_MIN_SENSITIVITY - 1) && (p_evt_write->data[0] < LDR_MAX_SENSITIVITY + 1))
-        {
-            ldr_sensitivity = p_evt_write->data[0];
-            
-        }
-    }
-}
-
-void ble_cb_on_ble_evt(ble_evt_t const * p_ble_evt, void * p_context)
+void ble_cb_on_ble_evt(ble_evt_t const *p_ble_evt, void *p_context)
 {
-    ble_cb_t * p_cb = (ble_cb_t *)p_context;
+    ble_cb_t *p_cb = (ble_cb_t *)p_context;
 
     switch (p_ble_evt->header.evt_id)
     {
-        case BLE_GATTS_EVT_WRITE:
-            on_write(p_cb, p_ble_evt);
-            break;
+    case BLE_GATTS_EVT_WRITE:
+        on_write(p_cb, p_ble_evt);
+        break;
 
-        default:
-            // No implementation needed.
-            break;
+    default:
+        // No implementation needed.
+        break;
     }
 }
 
@@ -140,9 +113,11 @@ uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init)
     add_char_params.max_len = sizeof(uint8_t);
     add_char_params.char_props.read = 1;
     add_char_params.char_props.write = 1;
+    add_char_params.char_props.notify = 1;
 
     add_char_params.read_access = SEC_OPEN;
     add_char_params.write_access = SEC_OPEN;
+    add_char_params.cccd_write_access = SEC_OPEN;
 
     err_code = characteristic_add(p_cb->service_handle,
                                   &add_char_params,
@@ -165,9 +140,9 @@ uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init)
     add_char_params.cccd_write_access = SEC_OPEN;
 
     err_code = characteristic_add(p_cb->service_handle,
-                              &add_char_params,
-                              &p_cb->ADC_char_handles);
-                              if (err_code != NRF_SUCCESS)
+                                  &add_char_params,
+                                  &p_cb->ADC_char_handles);
+    if (err_code != NRF_SUCCESS)
     {
         return err_code;
     }
@@ -179,34 +154,16 @@ uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init)
     add_char_params.max_len = sizeof(uint8_t);
     add_char_params.char_props.read = 1;
     add_char_params.char_props.write = 1;
-
-    add_char_params.read_access = SEC_OPEN;
-    add_char_params.write_access = SEC_OPEN;
-
-    err_code = characteristic_add(p_cb->service_handle,
-                                  &add_char_params,
-                                  &p_cb->ldr_write_char_handles);
-                                  if (err_code != NRF_SUCCESS)
-    {
-        return err_code;
-    }
-
-    // Add read LDR characteristic.
-    memset(&add_char_params, 0, sizeof(add_char_params));
-    add_char_params.uuid = CB_UUID_LDR_READ_CHAR;
-    add_char_params.uuid_type = p_cb->uuid_type;
-    add_char_params.init_len = sizeof(uint8_t);
-    add_char_params.max_len = sizeof(uint8_t);
-    add_char_params.char_props.read = 1;
     add_char_params.char_props.notify = 1;
 
     add_char_params.read_access = SEC_OPEN;
+    add_char_params.write_access = SEC_OPEN;
     add_char_params.cccd_write_access = SEC_OPEN;
 
     return characteristic_add(p_cb->service_handle,
-                              &add_char_params,
-                              &p_cb->ldr_char_handles);
-                              
+                                  &add_char_params,
+                                  &p_cb->ldr_write_char_handles);
+
 }
 
 uint32_t BLECB_MagneticChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t magnetic_state)
@@ -231,6 +188,20 @@ uint32_t BLECB_PIRChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t PIR_state
     memset(&params, 0, sizeof(params));
     params.type = BLE_GATT_HVX_NOTIFICATION;
     params.handle = p_cb->pir_char_handles.value_handle;
+    params.p_data = &PIR_state;
+    params.p_len = &len;
+
+    return sd_ble_gatts_hvx(conn_handle, &params);
+}
+
+uint32_t BLECB_PIRWriteChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t PIR_state)
+{
+    ble_gatts_hvx_params_t params;
+    uint16_t len = sizeof(PIR_state);
+
+    memset(&params, 0, sizeof(params));
+    params.type = BLE_GATT_HVX_NOTIFICATION;
+    params.handle = p_cb->pir_write_char_handles.value_handle;
     params.p_data = &PIR_state;
     params.p_len = &len;
 
@@ -265,6 +236,20 @@ uint32_t BLECB_LDRChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t ldr_hex_v
     return sd_ble_gatts_hvx(conn_handle, &params);
 }
 
+uint32_t BLECB_LDRWriteChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t ldr_hex_val)
+{
+    ble_gatts_hvx_params_t params;
+    uint16_t len = sizeof(ldr_hex_val);
+
+    memset(&params, 0, sizeof(params));
+    params.type = BLE_GATT_HVX_NOTIFICATION;
+    params.handle = p_cb->ldr_write_char_handles.value_handle;
+    params.p_data = &ldr_hex_val;
+    params.p_len = &len;
+
+    return sd_ble_gatts_hvx(conn_handle, &params);
+}
+
 void BLECB_CheckError(ret_code_t err_code)
 {
     if (err_code != NRF_SUCCESS &&
@@ -275,6 +260,43 @@ void BLECB_CheckError(ret_code_t err_code)
         APP_ERROR_CHECK(err_code);
     }
 };
+
+void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt)
+{
+    ble_gatts_evt_write_t const *p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
+
+    if ((p_evt_write->handle == p_cb->pir_write_char_handles.value_handle) &&
+        (p_evt_write->len == 1))
+    //(p_cb->pir_write_handler != NULL)
+    {
+        request_led_on = true;
+        // p_cb->pir_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_cb, p_evt_write->data[0]);
+        if ((p_evt_write->data[0] > PIR_MIN_SENSITIVITY - 1) && (p_evt_write->data[0] < PIR_MAX_SENSITIVITY + 1))
+        {
+            pir_sensitivity = p_evt_write->data[0];
+        }
+        else
+        {
+            BLECB_PIRWriteChange(m_conn_handle, &m_cb, pir_sensitivity);
+        }
+    }
+    if ((p_evt_write->handle == p_cb->ldr_write_char_handles.value_handle) &&
+        (p_evt_write->len == 1))
+    //(p_cb->pir_write_handler != NULL)
+    {
+        request_led_on = true;
+        // p_cb->pir_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_cb, p_evt_write->data[0]);
+        if ((p_evt_write->data[0] > LDR_MIN_SENSITIVITY - 1) && (p_evt_write->data[0] < LDR_MAX_SENSITIVITY + 1))
+        {
+            ldr_sensitivity = p_evt_write->data[0];
+        }
+        else
+        {
+            BLECB_LDRWriteChange(m_conn_handle, &m_cb, ldr_sensitivity);
+        }
+    }
+}
+
 
 /**
  * @}

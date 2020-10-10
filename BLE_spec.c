@@ -43,6 +43,8 @@ extern ble_cb_t m_cb;
 extern volatile uint8_t cell_percent;
 extern volatile sensor_param_t pir_state;
 extern volatile sensor_param_t door_state;
+extern volatile uint8_t pir_sensitivity;
+extern volatile uint8_t ldr_sensitivity;
 
 void BLE_GapParamsInit(void)
 {
@@ -207,6 +209,14 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
         BLECB_CheckError(err_code);
 
         err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, door_state.current_state);
+
+        BLECB_CheckError(err_code);
+		
+				err_code = BLECB_PIRWriteChange(m_conn_handle, &m_cb, pir_sensitivity);
+
+        BLECB_CheckError(err_code);
+		
+				err_code = BLECB_LDRWriteChange(m_conn_handle, &m_cb, ldr_sensitivity);
 
         BLECB_CheckError(err_code);
 

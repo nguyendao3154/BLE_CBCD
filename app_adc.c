@@ -45,6 +45,7 @@ extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buf
 extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
 extern ble_cb_t m_cb;
 extern uint8_t pir_sensitivity;
+extern uint8_t ldr_sensitivity;
 extern bool is_ADC_initialized;
 
 static nrf_saadc_value_t m_buffer[2][SAMPLES_IN_BUFFER];
@@ -201,7 +202,7 @@ void ADC_Task(void)
     {
         
         //NRF_LOG_INFO("%d", u16pinvalue);
-          NRF_LOG_INFO("%d, %d, %d",ldr_adc_value, u16pinvalue, pir_adc_value);
+          NRF_LOG_INFO("%d, %d",pir_sensitivity, ldr_sensitivity);
         adc_time_send++;
         if (adc_time_send % 1000 == 0)
         {
