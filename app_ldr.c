@@ -22,6 +22,7 @@
 #define LDR_INTERVAL_SCALE 750
 #define LDR_OFFSET_VALUE 10
 #define MIN_LDR_INV 10 //1s
+#define NUMBER_OF_LDR_POINT 9
 
 extern uint16_t ldr_adc_value;
 extern uint8_t ldr_sensitivity;
@@ -33,17 +34,17 @@ extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buf
 extern ble_cb_t m_cb;
 
 uint8_t ldr_BleMessage;
+uint16_t ldr_offset[NUMBER_OF_LDR_POINT] = {0, 550, 1000, 1450, 1900, 2350, 2800, 3250, 4096};
 
-ldr_param_t ldr_state = 
-{
-	.current_logic = 0,
-	.current_state = LDR_State_Smaller
-	
+ldr_param_t ldr_state =
+    {
+        .current_logic = 0,
+        .current_state = 0
+
 };
 
 void LDR_receive()
 {
-
 }
 void ldr_SendToBle(void)
 {
@@ -54,33 +55,34 @@ void ldr_SendToBle(void)
 
 void LDR_Process(void)
 {
-    if(ldr_adc_value > LDR_OFFSET_VALUE + LDR_INTERVAL_SCALE* ldr_sensitivity)
+    for (int i = 0; i < NUMBER_OF_LDR_POINT-1; i++)
     {
-        ldr_state.current_logic = 1;
+        if (ldr_adc_value > ldr_offset[i] && ldr_adc_value < ldr_offset[i + 1])
+        {
+            ldr_state.current_logic = i + 1;
+            // NRF_LOG_INFO("%d",ldr_state.current_logic);
+        }
     }
-    else 
-    {
-        ldr_state.current_logic = 0;
-    }
-    if(ldr_state.current_logic != ldr_state.previous_logic)
+    if (ldr_state.current_logic != ldr_state.previous_logic)
     {
         ldr_state.current_tick = g_systick;
     }
-    if(ldr_state.current_logic == ldr_state.previous_logic)
+    if (ldr_state.current_logic == ldr_state.previous_logic)
     {
-        if(g_systick - ldr_state.current_tick >= MIN_LDR_INV)
+        if (g_systick - ldr_state.current_tick >= MIN_LDR_INV)
         {
-            if(ldr_state.current_logic)
-            {
-                ldr_state.current_state = LDR_State_Greater;
-            }
-            else
-            {
-                ldr_state.current_state = LDR_State_Smaller;
-            }         
+            // for (int i = 0; i < NUMBER_OF_LDR_POINT-1; i++)
+            // {
+                // if (ldr_state.current_logic > ldr_offset[i] && ldr_state.current_logic < ldr_offset[i + 1])
+                // {
+                //     ldr_state.current_state = i + 1;
+                //     NRF_LOG_INFO("state %d",ldr_state.current_state);
+                // }
+                ldr_state.current_state = ldr_state.current_logic;
+            // }
         }
     }
-    if(ldr_state.current_state != ldr_state.previous_state)
+    if (ldr_state.current_state != ldr_state.previous_state)
     {
         ldr_SendToBle();
         NRF_LOG_INFO("hello");
@@ -88,7 +90,3 @@ void LDR_Process(void)
     ldr_state.previous_logic = ldr_state.current_logic;
     ldr_state.previous_state = ldr_state.current_state;
 }
-
-
-
-

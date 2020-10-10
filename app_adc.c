@@ -202,7 +202,7 @@ void ADC_Task(void)
     {
         
         //NRF_LOG_INFO("%d", u16pinvalue);
-          NRF_LOG_INFO("%d, %d",pir_sensitivity, ldr_sensitivity);
+        //   NRF_LOG_INFO("%d",ldr_adc_value);
         adc_time_send++;
         if (adc_time_send % 1000 == 0)
         {

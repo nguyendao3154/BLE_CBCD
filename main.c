@@ -73,7 +73,7 @@ void power_management_init(void)
 int main(void)
 {
   // Initialize.
-  // log_init();
+  //log_init();
   timers_init();
   power_management_init();
   SENSOR_InterruptInit();

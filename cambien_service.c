@@ -164,7 +164,6 @@ uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init)
     err_code = characteristic_add(p_cb->service_handle,
                                   &add_char_params,
                                   &p_cb->ldr_write_char_handles);
-                                  
     if (err_code != NRF_SUCCESS)
     {
         return err_code;

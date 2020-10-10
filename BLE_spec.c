@@ -219,7 +219,10 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
 				err_code = BLECB_LDRWriteChange(m_conn_handle, &m_cb, ldr_sensitivity);
 
         BLECB_CheckError(err_code);
-
+		
+				BLECB_LDRChange(m_conn_handle, &m_cb, 1);
+				
+				err_code = BLECB_LDRChange(m_conn_handle, &m_cb, 1);
         break;
 
     case BLE_GAP_EVT_DISCONNECTED:

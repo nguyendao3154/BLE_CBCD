@@ -27,8 +27,15 @@
 
 typedef enum _ldr_state
 {
-    LDR_State_Smaller = 0,
-    LDR_State_Greater,
+    LDR_State_1 = 1,
+    LDR_State_2,
+    LDR_State_3,
+    LDR_State_4,
+    LDR_State_5,
+    LDR_State_6,
+    LDR_State_7,
+    LDR_State_8
+
 }ldr_state_t;
 
 typedef struct{
