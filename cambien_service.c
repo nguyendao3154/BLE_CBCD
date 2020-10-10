@@ -24,6 +24,7 @@
 
 
 extern uint8_t pir_sensitivity;
+extern uint8_t ldr_sensitivity;
 extern bool request_led_on;
 void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt)
 {
@@ -182,10 +183,30 @@ uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init)
     add_char_params.read_access = SEC_OPEN;
     add_char_params.write_access = SEC_OPEN;
 
-    return characteristic_add(p_cb->service_handle,
+    err_code = characteristic_add(p_cb->service_handle,
                                   &add_char_params,
                                   &p_cb->ldr_write_char_handles);
+                                  if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
 
+    // Add read LDR characteristic.
+    memset(&add_char_params, 0, sizeof(add_char_params));
+    add_char_params.uuid = CB_UUID_LDR_READ_CHAR;
+    add_char_params.uuid_type = p_cb->uuid_type;
+    add_char_params.init_len = sizeof(uint8_t);
+    add_char_params.max_len = sizeof(uint8_t);
+    add_char_params.char_props.read = 1;
+    add_char_params.char_props.notify = 1;
+
+    add_char_params.read_access = SEC_OPEN;
+    add_char_params.cccd_write_access = SEC_OPEN;
+
+    return characteristic_add(p_cb->service_handle,
+                              &add_char_params,
+                              &p_cb->ldr_char_handles);
+                              
 }
 
 uint32_t BLECB_MagneticChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t magnetic_state)
@@ -225,6 +246,20 @@ uint32_t BLECB_ADCChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t adc_hex_v
     params.type = BLE_GATT_HVX_NOTIFICATION;
     params.handle = p_cb->ADC_char_handles.value_handle;
     params.p_data = &adc_hex_val;
+    params.p_len = &len;
+
+    return sd_ble_gatts_hvx(conn_handle, &params);
+}
+
+uint32_t BLECB_LDRChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t ldr_hex_val)
+{
+    ble_gatts_hvx_params_t params;
+    uint16_t len = sizeof(ldr_hex_val);
+
+    memset(&params, 0, sizeof(params));
+    params.type = BLE_GATT_HVX_NOTIFICATION;
+    params.handle = p_cb->ldr_char_handles.value_handle;
+    params.p_data = &ldr_hex_val;
     params.p_len = &len;
 
     return sd_ble_gatts_hvx(conn_handle, &params);

@@ -7,6 +7,8 @@
 ".\_build\app_sensor.o"
 ".\_build\app_led.o"
 ".\_build\cambien_service.o"
+".\_build\app_ldr.o"
+".\_build\user_timer.o"
 ".\_build\boards.o"
 ".\_build\utf.o"
 ".\_build\ble_advdata.o"

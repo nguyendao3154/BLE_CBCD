@@ -41,8 +41,8 @@ ble_gap_adv_data_t m_adv_data =
 
 extern ble_cb_t m_cb;
 extern volatile uint8_t cell_percent;
-extern volatile uint8_t pir_task_state;
-extern volatile uint8_t magnetic_logic_level;
+extern volatile sensor_state_t pir_state;
+extern volatile sensor_state_t door_state;
 
 void BLE_GapParamsInit(void)
 {
@@ -202,11 +202,11 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
 
         BLECB_CheckError(err_code);
 
-        err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_task_state);
+        err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_state.current_state);
 
         BLECB_CheckError(err_code);
 
-        err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, magnetic_logic_level);
+        err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, door_state.current_state);
 
         BLECB_CheckError(err_code);
 

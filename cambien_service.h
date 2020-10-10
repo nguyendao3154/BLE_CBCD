@@ -40,6 +40,7 @@ extern "C"
 #define CB_UUID_PIR_WRITE_CHAR 0x1237
 #define CB_UUID_ADC_CHAR 0x1238
 #define CB_UUID_LDR_WRITE_CHAR 0x1239
+#define CB_UUID_LDR_READ_CHAR 0x1240
 
     typedef struct ble_cb_s ble_cb_t;
 
@@ -59,6 +60,7 @@ typedef struct
         ble_gatts_char_handles_t magnetic_char_handles;
         ble_gatts_char_handles_t pir_char_handles;
         ble_gatts_char_handles_t ADC_char_handles;
+        ble_gatts_char_handles_t ldr_char_handles;
         ble_gatts_char_handles_t pir_write_char_handles;
         ble_gatts_char_handles_t ldr_write_char_handles;
         ble_cb_pir_write_handler_t pir_write_handler;
@@ -67,10 +69,10 @@ typedef struct
     };
 
 typedef enum{
-    PIR_MAX_SENSITIVITY = 8;
-    PIR_MIN_SENSITIVITY = 1;
-    LDR_MAX_SENSITIVITY = 8;
-    LDR_MIN_SENSITIVITY = 1;
+    PIR_MAX_SENSITIVITY = 8,
+    PIR_MIN_SENSITIVITY = 1,
+    LDR_MAX_SENSITIVITY = 5,
+    LDR_MIN_SENSITIVITY = 1
 }write_sensitivity;
 
     uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init);
@@ -80,6 +82,8 @@ typedef enum{
     uint32_t BLECB_PIRChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t PIR_state);
 
     uint32_t BLECB_ADCChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t adc_hex_val);
+
+    uint32_t BLECB_LDRChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t ldr_hex_val);
 
     void BLECB_CheckError(ret_code_t err_code);
 

@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
- * @file    app_interrupt.h
- * @author  Makipos Co.,LTD.
+ * @file    app_sensor.h
+ * @author  Makipos Co.,LTD. Nguyen DD
  * @version 1.0
  * @date    May 28, 2020
  * @brief   
@@ -22,7 +22,6 @@
 #include "nrf_drv_gpiote.h"
 #include "app_timer.h"
 #include "BLE_spec.h"
-#include "app_led.h"
 #include "app_led.h"
 
 /* Includes ------------------------------------------------------------------*/
@@ -47,10 +46,6 @@ void SENSOR_InterruptInit(void);
 void SENSOR_MagneticTask(void);
 
 void SENSOR_PIR_Task(void);
-
-void SENSOR_CreateTimer(void);
-
-void SENSOR_TickCount(void *p_context);
 
 void SENSOR_PIR_Software_Reg(void); 
 #endif /* APP_SENSOR_H */

@@ -565,6 +565,16 @@
               <FileType>5</FileType>
               <FilePath>..\..\..\cambien_service.h</FilePath>
             </File>
+            <File>
+              <FileName>app_ldr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\app_ldr.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\user_timer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4037,6 +4047,16 @@
               <FileName>cambien_service.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\cambien_service.h</FilePath>
+            </File>
+            <File>
+              <FileName>app_ldr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\app_ldr.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\user_timer.c</FilePath>
             </File>
           </Files>
         </Group>

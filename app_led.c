@@ -3,7 +3,7 @@
 #define LED_ON_TIME_DEFAUT 30              // 3s
 
 bool request_led_on = false;
-extern uint32_t sensor_ticks;
+extern uint32_t g_systick;
 uint32_t led_current_time;
 
 void LED_Config(void)
@@ -24,13 +24,13 @@ void LED_Turn_off(void)
 
 void LED_Task(void)
 {
-    if (sensor_ticks - led_current_time > LED_ON_TIME_DEFAUT)
+    if (g_systick - led_current_time > LED_ON_TIME_DEFAUT)
     {
         LED_Turn_off();       
     }  
     if(request_led_on)
     {
-        led_current_time = sensor_ticks;
+        led_current_time = g_systick;
         LED_Turn_on();
         request_led_on = false;
     }

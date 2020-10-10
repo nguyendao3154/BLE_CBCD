@@ -1,3 +1,22 @@
+/**
+ ******************************************************************************
+ * @file    main.c
+ * @author  Makipos Co.,LTD.
+ * @version 1.0
+ * @date    May 28, 2020
+ * @brief
+ * @history
+ *
+ *                      Revision History                                      *
+ ****************************
+ * Revision     Date            By              Description                         *
+ ****************************
+ * 1.0.0        28-May-2020     Nguyen Dao          create                                *
+
+ ******************************************************************************/
+/*******************************************************************************
+  * Include
+  ******************************************************************************/
 #include <stdint.h>
 #include <string.h>
 #include "nordic_common.h"
@@ -7,9 +26,13 @@
 #include "app_adc.h"
 #include "app_sensor.h"
 #include "app_led.h"
+#include "app_ldr.h"
+#include "user_timer.h"
+
 #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
-uint8_t pir_sensitivity;
+uint8_t pir_sensitivity = 3;
+uint8_t ldr_sensitivity = 1;
 // bool m_saadc_initialized = false;
 // volatile uint8_t u8pinvalue;
 
@@ -25,7 +48,7 @@ static void timers_init(void)
     ret_code_t err_code = app_timer_init();
     APP_ERROR_CHECK(err_code);
     ADC_CreateTimer();
-    SENSOR_CreateTimer();
+    User_CreateTimer();
 }
 
 void log_init(void)
@@ -59,7 +82,7 @@ int main(void)
     SENSOR_MagneticGetInitialValue();
 		ADC_Init();
     BLE_StackInit();
-		sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
+		//sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
     BLE_GapParamsInit();
     BLE_GattInit(&m_gatt);
     BLE_ServicesInit(&m_cb);
@@ -77,6 +100,7 @@ int main(void)
     {
 	
         //SENSOR_MagneticTask();
+				LDR_Process();
         SENSOR_PIR_Task();
         ADC_Task();
         LED_Task();

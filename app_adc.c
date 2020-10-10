@@ -36,6 +36,7 @@
 uint16_t adc_time_send;
 uint16_t pir_adc_value;
 uint16_t ldr_adc_value;
+
 bool is_ADC_initialized = false;
 bool is_cell_adc_ready_to_sent = true;
 
@@ -192,20 +193,10 @@ void ADC_CreateTimer(void)
     APP_ERROR_CHECK(app_timer_start(m_adc_id, APP_TIMER_TICKS(ADC_TIME_SCAN), NULL));
 }
 
-void ADC_Task(void)
+void cell_calculate_and_send(void)
 {
-
-    if (is_ADC_initialized)
-    {
-        ret_code_t err_code;
-        //NRF_LOG_INFO("%d", u16pinvalue);
-        //  NRF_LOG_INFO("%d",ldr_adc_value);
-        adc_time_send++;
-        if (adc_time_send % 1000 == 0)
-        {
-            is_cell_adc_ready_to_sent = true;
-        }
-        for (int i = 0; i < NUMBER_OF_CELL_ADC_POINT - 1; i++)
+	ret_code_t err_code;
+	for (int i = 0; i < NUMBER_OF_CELL_ADC_POINT - 1; i++)
         {
             if (u16pinvalue > battery_adc_table[i] && u16pinvalue < battery_adc_table[i + 1])
             {
@@ -228,6 +219,22 @@ void ADC_Task(void)
             is_cell_adc_ready_to_sent = false;
 						BLECB_CheckError(err_code);
         }
+}
+	
+void ADC_Task(void)
+{
+
+    if (is_ADC_initialized)
+    {
+        
+        //NRF_LOG_INFO("%d", u16pinvalue);
+          NRF_LOG_INFO("%d",ldr_adc_value);
+        adc_time_send++;
+        if (adc_time_send % 1000 == 0)
+        {
+            is_cell_adc_ready_to_sent = true;
+        }
+        cell_calculate_and_send();
     }
 }
 
