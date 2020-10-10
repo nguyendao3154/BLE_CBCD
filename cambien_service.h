@@ -40,6 +40,7 @@ extern "C"
 #define CB_UUID_PIR_WRITE_CHAR 0x1237
 #define CB_UUID_ADC_CHAR 0x1238
 #define CB_UUID_LDR_WRITE_CHAR 0x1239
+#define CB_UUID_LDR_READ_CHAR 0x1240
 
     typedef struct ble_cb_s ble_cb_t;
 

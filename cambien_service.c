@@ -29,7 +29,7 @@ extern uint16_t m_conn_handle;                                          /**< Han
 extern uint8_t m_adv_handle;                                            /**< Advertising handle used to identify an advertising set. */
 extern uint8_t m_enc_advdata[BLE_GAP_ADV_SET_DATA_SIZE_MAX];            /**< Buffer for storing an encoded advertising set. */
 extern uint8_t m_enc_scan_response_data[BLE_GAP_ADV_SET_DATA_SIZE_MAX]; /**< Buffer for storing an encoded scan data. */
-extern ble_cb_t m_cb;     
+extern ble_cb_t m_cb;
 
 void ble_cb_on_ble_evt(ble_evt_t const *p_ble_evt, void *p_context)
 {
@@ -146,6 +146,7 @@ uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init)
     {
         return err_code;
     }
+
     // Add Write LDR characteristic.
     memset(&add_char_params, 0, sizeof(add_char_params));
     add_char_params.uuid = CB_UUID_LDR_WRITE_CHAR;
@@ -160,10 +161,30 @@ uint32_t BLECB_Init(ble_cb_t *p_cb, ble_cb_init_t *p_cb_init)
     add_char_params.write_access = SEC_OPEN;
     add_char_params.cccd_write_access = SEC_OPEN;
 
-    return characteristic_add(p_cb->service_handle,
+    err_code = characteristic_add(p_cb->service_handle,
                                   &add_char_params,
                                   &p_cb->ldr_write_char_handles);
+                                  
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
 
+    // Add LDR Read characteristic.
+    memset(&add_char_params, 0, sizeof(add_char_params));
+    add_char_params.uuid = CB_UUID_LDR_READ_CHAR;
+    add_char_params.uuid_type = p_cb->uuid_type;
+    add_char_params.init_len = sizeof(uint8_t);
+    add_char_params.max_len = sizeof(uint8_t);
+    add_char_params.char_props.read = 1;
+    add_char_params.char_props.notify = 1;
+
+    add_char_params.read_access = SEC_OPEN;
+    add_char_params.cccd_write_access = SEC_OPEN;
+
+    return characteristic_add(p_cb->service_handle,
+                              &add_char_params,
+                              &p_cb->ldr_char_handles);
 }
 
 uint32_t BLECB_MagneticChange(uint16_t conn_handle, ble_cb_t *p_cb, uint8_t magnetic_state)
@@ -296,7 +317,6 @@ void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt)
         }
     }
 }
-
 
 /**
  * @}
