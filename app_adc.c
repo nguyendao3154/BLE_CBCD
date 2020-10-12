@@ -26,7 +26,6 @@
 
 #define LDR_NUMBER_CHANNEL 6
 
-
 #define ADC_RESOLUTION 4095
 #define TEN_TIMES_V_REF 6
 #define HUNDRED_TIMES_ADC_GAIN_HARDWARE 18
@@ -169,38 +168,38 @@ void ADC_Init(void)
 
 void cell_calculate_and_send(void)
 {
-	ret_code_t err_code;
-	for (int i = 0; i < NUMBER_OF_CELL_ADC_POINT - 1; i++)
+    ret_code_t err_code;
+    for (int i = 0; i < NUMBER_OF_CELL_ADC_POINT - 1; i++)
+    {
+        if (u16pinvalue > battery_adc_table[i] && u16pinvalue < battery_adc_table[i + 1])
         {
-            if (u16pinvalue > battery_adc_table[i] && u16pinvalue < battery_adc_table[i + 1])
-            {
-                cell_percent = (u16pinvalue - battery_adc_table[i]) * (battery_percent_table[i + 1] - battery_percent_table[i]) / (battery_adc_table[i + 1] - battery_adc_table[i]) + battery_percent_table[i];
-            }
-            if (u16pinvalue > battery_adc_table[NUMBER_OF_CELL_ADC_POINT - 1])
-            {
-                cell_percent = 100;
-            }
-            if (u16pinvalue < battery_adc_table[0])
-            {
-                cell_percent = 0;
-            }
+            cell_percent = (u16pinvalue - battery_adc_table[i]) * (battery_percent_table[i + 1] - battery_percent_table[i]) / (battery_adc_table[i + 1] - battery_adc_table[i]) + battery_percent_table[i];
         }
-       
-        if (is_cell_adc_ready_to_sent == true)
+        if (u16pinvalue > battery_adc_table[NUMBER_OF_CELL_ADC_POINT - 1])
         {
-						NRF_LOG_INFO("%d", cell_percent);
-            err_code = BLECB_ADCChange(m_conn_handle, &m_cb, cell_percent);
-            is_cell_adc_ready_to_sent = false;
-						BLECB_CheckError(err_code);
+            cell_percent = 100;
         }
+        if (u16pinvalue < battery_adc_table[0])
+        {
+            cell_percent = 0;
+        }
+    }
+
+    if (is_cell_adc_ready_to_sent == true)
+    {
+        NRF_LOG_INFO("%d", cell_percent);
+        err_code = BLECB_ADCChange(m_conn_handle, &m_cb, cell_percent);
+        is_cell_adc_ready_to_sent = false;
+        BLECB_CheckError(err_code);
+    }
 }
-	
+
 void ADC_Task(void)
 {
 
     if (is_ADC_initialized)
     {
-        
+
         //NRF_LOG_INFO("%d", u16pinvalue);
         //   NRF_LOG_INFO("%d",ldr_adc_value);
         adc_time_send++;

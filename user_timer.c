@@ -28,19 +28,19 @@ APP_TIMER_DEF(timer_systick_id);
 
 void TimerHandle(void *p_context) // 100 ms
 {
-    g_systick++;
-		if (!is_ADC_initialized)
-    {
-        ADC_Init(); //Initialize the SAADC. In the case when SAADC_SAMPLES_IN_BUFFER > 1 then we only need to initialize the SAADC when the the buffer is empty.
-    }
+  g_systick++;
+  if (!is_ADC_initialized)
+  {
+    ADC_Init(); //Initialize the SAADC. In the case when SAADC_SAMPLES_IN_BUFFER > 1 then we only need to initialize the SAADC when the the buffer is empty.
+  }
 }
 
 void User_CreateTimer(void)
 {
-    ret_code_t err_code;
-    err_code = app_timer_create(&timer_systick_id,
-                                APP_TIMER_MODE_REPEATED,
-                                TimerHandle);
-    APP_ERROR_CHECK(err_code);
-    APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(100), NULL)); // ngat 100 ms
+  ret_code_t err_code;
+  err_code = app_timer_create(&timer_systick_id,
+                              APP_TIMER_MODE_REPEATED,
+                              TimerHandle);
+  APP_ERROR_CHECK(err_code);
+  APP_ERROR_CHECK(app_timer_start(timer_systick_id, APP_TIMER_TICKS(100), NULL)); // ngat 100 ms
 }

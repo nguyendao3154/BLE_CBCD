@@ -211,18 +211,18 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
         err_code = BLECB_MagneticChange(m_conn_handle, &m_cb, door_state.current_state);
 
         BLECB_CheckError(err_code);
-		
-				err_code = BLECB_PIRWriteChange(m_conn_handle, &m_cb, pir_sensitivity);
+
+        err_code = BLECB_PIRWriteChange(m_conn_handle, &m_cb, pir_sensitivity);
 
         BLECB_CheckError(err_code);
-		
-				err_code = BLECB_LDRWriteChange(m_conn_handle, &m_cb, ldr_sensitivity);
+
+        err_code = BLECB_LDRWriteChange(m_conn_handle, &m_cb, ldr_sensitivity);
 
         BLECB_CheckError(err_code);
-		
-				BLECB_LDRChange(m_conn_handle, &m_cb, 1);
-				
-				err_code = BLECB_LDRChange(m_conn_handle, &m_cb, 1);
+
+        BLECB_LDRChange(m_conn_handle, &m_cb, 1);
+
+        err_code = BLECB_LDRChange(m_conn_handle, &m_cb, 1);
         break;
 
     case BLE_GAP_EVT_DISCONNECTED:
@@ -240,9 +240,9 @@ void BLE_EvtHandler(ble_evt_t const *p_ble_evt, void *p_context)
         APP_ERROR_CHECK(err_code);
         break;
 
-    // case BLE_GATTS_EVT_WRITE:
-    //     on_write(p_cb, p_ble_evt);
-    //     break;
+        // case BLE_GATTS_EVT_WRITE:
+        //     on_write(p_cb, p_ble_evt);
+        //     break;
 
     case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
     {
