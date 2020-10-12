@@ -19,7 +19,7 @@
 #include "nrf_gpio.h"
 #include "app_timer.h"
 
-#define LED_PIN 25
+#define LED_PIN 20
 
 void LED_Config(void);
 

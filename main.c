@@ -80,7 +80,7 @@ int main(void)
   SENSOR_MagneticGetInitialValue();
   ADC_Init();
   BLE_StackInit();
-  //sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
+  sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
   BLE_GapParamsInit();
   BLE_GattInit(&m_gatt);
   BLE_ServicesInit(&m_cb);
@@ -97,9 +97,9 @@ int main(void)
   for (;;)
   {
 
-    //SENSOR_MagneticTask();
+    SENSOR_MagneticTask();
     LDR_Process();
-    SENSOR_PIR_Task();
+    // SENSOR_PIR_Task();
     ADC_Task();
     LED_Task();
     NRF_LOG_FLUSH();
