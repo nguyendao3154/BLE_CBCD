@@ -86,6 +86,7 @@ int main(void)
   BLE_ServicesInit(&m_cb);
   BLE_AdvertisingInit(&m_cb);
   BLE_ConnParamsInit();
+
   BLE_AdvertisingStart();
   LED_Config();
   nrf_gpio_pin_clear(LED_PIN);
@@ -93,7 +94,7 @@ int main(void)
   //ADC_DeinitDriver();
   // Start execution.
   NRF_LOG_INFO("CBCD started.");
-  // Enter main loop./
+  // Enter main loop./s
   for (;;)
   {
 

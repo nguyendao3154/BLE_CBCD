@@ -40,6 +40,11 @@ typedef struct{
     uint32_t current_tick;
     uint32_t previous_tick;
 }sensor_param_t;
+
+typedef struct{
+    uint16_t max_offset;
+    uint16_t min_offset;
+}pir_offset_t;
 void SENSOR_MagneticGetInitialValue(void);
 
 void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);

@@ -22,12 +22,11 @@
 // #define PIR_HARDWARE_CALIB
 
 #define PIR_TIMEOUT 100 // 10s
-#define PIR_INTERVAL_SCALE 50
+// #define PIR_INTERVAL_SCALE 50
 
 #define DOOR_MINIMUM_INTERVAL 3 // 0.3s
 #define DOOR_MAXIMUM_INTERVAL 8
 #define DEFAULT_MAGNETIC_STATE 3
-
 #define LDR_OFFSET_VALUE 100
 
 extern uint32_t g_systick;
@@ -39,18 +38,21 @@ extern ble_cb_t m_cb;
 extern bool request_led_on;
 extern uint8_t pir_sensitivity;
 
+extern linear_param_t pir_adc_calculate;
 extern uint16_t pir_adc_value;
 
-uint16_t pir_offset_value[2] = {1425, 2525};
+// uint16_t pir_offset_value[2] = {1450, 2550};
+pir_offset_t pir_offset_value_default = {
+    .max_offset = 2330,
+    .min_offset = 1670};
+;
+pir_offset_t pir_offset_calculated;
 bool magnetic_flag = false;
 
-
 sensor_param_t pir_state = {
-    .current_state = 1
-};
+    .current_state = 1};
 sensor_param_t door_state = {
-    .previous_state = DEFAULT_MAGNETIC_STATE
-};
+    .previous_state = DEFAULT_MAGNETIC_STATE};
 
 void SENSOR_MagneticGetInitialValue(void)
 {
@@ -77,11 +79,11 @@ void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 
 void SENSOR_PIR_Software_Reg(void)
 {
-    if ((pir_adc_value < (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity)) || (pir_adc_value > (pir_offset_value[1] - PIR_INTERVAL_SCALE * pir_sensitivity)))
+    if ((pir_adc_value < (pir_offset_calculated.min_offset + pir_adc_calculate.pir_scale * pir_sensitivity)) || (pir_adc_value > (pir_offset_calculated.max_offset - pir_adc_calculate.pir_scale * pir_sensitivity)))
     {
         pir_state.current_logic = 1;
         // NRF_LOG_INFO("%d", (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity));
-                //    NRF_LOG_INFO("adc = %d",pir_adc_value);
+        //    NRF_LOG_INFO("adc = %d",pir_adc_value);
     }
     else
     {
@@ -218,17 +220,15 @@ void SENSOR_PIR_Task(void)
         {
             request_led_on = true;
         }
-        err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_state.current_state);  
-				NRF_LOG_INFO("GUI DU LIEU");
-     
+        err_code = BLECB_PIRChange(m_conn_handle, &m_cb, pir_state.current_state);
+        NRF_LOG_INFO("GUI DU LIEU");
+
         BLECB_CheckError(err_code);
     }
     //NRF_LOG_INFO("%d\n", numsof1000ticks_pir);
     // NRF_LOG_INFO("%d %d %d %d\n", pir_pre_state, pir_state.current_logic, pir_task_pre_state, pir_task_state);
-    pir_state.previous_state = pir_state.current_state; 
+    pir_state.previous_state = pir_state.current_state;
 }
-
-
 
 /**
  * @}

@@ -20,6 +20,16 @@
 #include "nrf_drv_saadc.h"
 #include "app_timer.h"
 #include "BLE_spec.h"
+#include "app_sensor.h"
+
+#define LINEAR_PAM_A 171
+#define LINEAR_PAM_B 3071
+/* 171*Vdd*10 + 3071 = k*PIR_INV */
+typedef struct linear_param{
+    uint16_t Vdd_10;
+    uint16_t k;
+    uint16_t pir_scale;
+}linear_param_t;
 
 void ADC_DeinitDriver(void);
 

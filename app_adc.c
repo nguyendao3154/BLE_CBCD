@@ -25,7 +25,7 @@
 #define BAT_NUMBER_CHANNEL 4
 
 #define LDR_NUMBER_CHANNEL 6
-
+#define PIR_MAX_SEN 11
 #define ADC_RESOLUTION 4095
 #define TEN_TIMES_V_REF 6
 #define HUNDRED_TIMES_ADC_GAIN_HARDWARE 18
@@ -46,7 +46,8 @@ extern ble_cb_t m_cb;
 extern uint8_t pir_sensitivity;
 extern uint8_t ldr_sensitivity;
 extern bool is_ADC_initialized;
-
+extern pir_offset_t pir_offset_value_default;
+extern pir_offset_t pir_offset_calculated;
 static nrf_saadc_value_t m_buffer[2][SAMPLES_IN_BUFFER];
 
 uint16_t battery_adc_table[NUMBER_OF_CELL_ADC_POINT] = {615, 675, 830, 950};
@@ -54,6 +55,12 @@ uint8_t battery_percent_table[NUMBER_OF_CELL_ADC_POINT] = {0, 10, 90, 100};
 volatile uint8_t cell_percent;
 static uint16_t u16pinvalue;
 
+linear_param_t pir_adc_ref = {
+    .Vdd_10 = 30,
+    .k = 8192,
+    .pir_scale = 30};
+
+linear_param_t pir_adc_calculate;
 /**
  * @brief Tat ADC driver
  */
@@ -87,10 +94,11 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
          * Battery 3V
          * Gain 0.18
          */
-        // u16pinvalue = (p_event->data.done.p_buffer[1]) * TEN_TIMES_V_REF * 100 * ADC_GAIN_SOFTWARE / HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
+        pir_adc_calculate.Vdd_10 = (p_event->data.done.p_buffer[1]) * TEN_TIMES_V_REF * 100 * ADC_GAIN_SOFTWARE / HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
         u16pinvalue = (p_event->data.done.p_buffer[1]);
 
-        pir_adc_value = (p_event->data.done.p_buffer[0]) * 100 / HUNDRED_TIMES_ADC_GAIN_HARDWARE;
+        pir_adc_value = (p_event->data.done.p_buffer[0]) * 100 / HUNDRED_TIMES_ADC_GAIN_HARDWARE / pir_adc_calculate.Vdd_10 * 24;
+        //pir_adc_value = (p_event->data.done.p_buffer[0]);
         ldr_adc_value = (p_event->data.done.p_buffer[2]);
         //Clear the SAADC interrupt if set
         ADC_DeinitDriver(); // gui xong du lieu ADC, tat ADC driver de tiet kiem nang luong
@@ -115,7 +123,7 @@ void ADC_Init(void)
     APP_ERROR_CHECK(err_code);
 
     //Configure SAADC channel
-    channel_config_1.reference = NRF_SAADC_REFERENCE_VDD4;     //Set internal reference of fixed 0.6 volts
+    channel_config_1.reference = NRF_SAADC_REFERENCE_INTERNAL; //Set internal reference of fixed 0.6 volts
     channel_config_1.gain = NRF_SAADC_GAIN1_4;                 //Set input gain to 1/6. The maximum SAADC input voltage is then 0.6V/(1/6)=3.6V. The single ended input range is then 0V-3.6V
     channel_config_1.acq_time = NRF_SAADC_ACQTIME_10US;        //Set acquisition time. Set low acquisition time to enable maximum sampling frequency of 200kHz. Set high acquisition time to allow maximum source resistance up to 800 kohm, see the SAADC electrical specification in the PS.
     channel_config_1.mode = NRF_SAADC_MODE_SINGLE_ENDED;       //Set SAADC as single ended. This means it will only have the positive pin as input, and the negative pin is shorted to ground (0V) internally.
@@ -193,15 +201,21 @@ void cell_calculate_and_send(void)
         BLECB_CheckError(err_code);
     }
 }
-
+void ADC_PIR_ScaleInterval(void)
+{
+    pir_adc_calculate.k = LINEAR_PAM_A * pir_adc_calculate.Vdd_10 + LINEAR_PAM_B;
+    pir_adc_calculate.pir_scale = pir_adc_calculate.k * pir_adc_ref.pir_scale / pir_adc_ref.k;
+    pir_offset_calculated.min_offset = 2000 - pir_adc_calculate.pir_scale * PIR_MAX_SEN;
+    pir_offset_calculated.max_offset = 2000 + pir_adc_calculate.pir_scale * PIR_MAX_SEN;
+}
 void ADC_Task(void)
 {
 
     if (is_ADC_initialized)
     {
-
-        //NRF_LOG_INFO("%d", u16pinvalue);
-        //   NRF_LOG_INFO("%d",ldr_adc_value);
+        ADC_PIR_ScaleInterval();
+        // NRF_LOG_INFO("%d, %d", u16pinvalue, pir_adc_value);
+        NRF_LOG_INFO("%d, %d", pir_adc_value, pir_adc_calculate.pir_scale);
         adc_time_send++;
         if (adc_time_send % 1000 == 0)
         {
