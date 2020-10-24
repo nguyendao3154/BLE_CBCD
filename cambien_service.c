@@ -294,6 +294,7 @@ void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt)
         if ((p_evt_write->data[0] > PIR_MIN_SENSITIVITY - 1) && (p_evt_write->data[0] < PIR_MAX_SENSITIVITY + 1))
         {
             pir_sensitivity = p_evt_write->data[0];
+						BLECB_PIRWriteChange(m_conn_handle, &m_cb, pir_sensitivity);
         }
         else
         {
