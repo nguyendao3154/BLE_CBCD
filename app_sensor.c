@@ -43,8 +43,8 @@ extern uint16_t pir_adc_value;
 
 // uint16_t pir_offset_value[2] = {1450, 2550};
 pir_offset_t pir_offset_value_default = {
-    .max_offset = 2330,
-    .min_offset = 1670};
+    .max_offset = 2550,
+    .min_offset = 1450};
 ;
 pir_offset_t pir_offset_calculated;
 bool magnetic_flag = false;
@@ -75,7 +75,8 @@ void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
         // NRF_LOG_INFO("Xa nam cham\r\n");
     }
 }
-#ifndef PIR_HARDWARE_CALIB
+#ifndef PIR_HARDWARE_CALIB33
+
 
 void SENSOR_PIR_Software_Reg(void)
 {

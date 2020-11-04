@@ -70,26 +70,36 @@ void power_management_init(void)
   APP_ERROR_CHECK(err_code);
 }
 
+void get_mac_address(void)
+{
+		ble_gap_addr_t addr;
+	ret_code_t err_code;
+	err_code = sd_ble_gap_addr_get(&addr);
+	APP_ERROR_CHECK(err_code);
+	NRF_LOG_INFO("mac %x%x%x%x%x%x",addr.addr[0],addr.addr[1],addr.addr[2],addr.addr[3],addr.addr[4],addr.addr[5]);
+}
+
 int main(void)
 {
   // Initialize.
-  //log_init();
+  log_init();
   timers_init();
   power_management_init();
   SENSOR_InterruptInit();
   SENSOR_MagneticGetInitialValue();
   ADC_Init();
   BLE_StackInit();
-  //sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
+  sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
   BLE_GapParamsInit();
   BLE_GattInit(&m_gatt);
   BLE_ServicesInit(&m_cb);
   BLE_AdvertisingInit(&m_cb);
   BLE_ConnParamsInit();
-
   BLE_AdvertisingStart();
   LED_Config();
   nrf_gpio_pin_clear(LED_PIN);
+	
+	get_mac_address();
   // nrf_drv_saadc_sample();
   //ADC_DeinitDriver();
   // Start execution.

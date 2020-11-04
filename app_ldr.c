@@ -85,7 +85,7 @@ void LDR_Process(void)
     if (ldr_state.current_state != ldr_state.previous_state)
     {
         ldr_SendToBle();
-        NRF_LOG_INFO("hello");
+        //NRF_LOG_INFO("hello");
     }
     ldr_state.previous_logic = ldr_state.current_logic;
     ldr_state.previous_state = ldr_state.current_state;

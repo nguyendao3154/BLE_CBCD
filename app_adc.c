@@ -215,10 +215,13 @@ void ADC_Task(void)
     {
         ADC_PIR_ScaleInterval();
         // NRF_LOG_INFO("%d, %d", u16pinvalue, pir_adc_value);
-        NRF_LOG_INFO("%d, %d", pir_adc_value, pir_adc_calculate.pir_scale);
+        //NRF_LOG_INFO("%d, %d", pir_adc_value, pir_adc_calculate.pir_scale);
+				
+				
         adc_time_send++;
         if (adc_time_send % 1000 == 0)
         {
+					
             is_cell_adc_ready_to_sent = true;
         }
         cell_calculate_and_send();

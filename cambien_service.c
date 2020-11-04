@@ -289,7 +289,7 @@ void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt)
         (p_evt_write->len == 1))
     //(p_cb->pir_write_handler != NULL)
     {
-        request_led_on = true;
+        //request_led_on = true;
         // p_cb->pir_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_cb, p_evt_write->data[0]);
         if ((p_evt_write->data[0] > PIR_MIN_SENSITIVITY - 1) && (p_evt_write->data[0] < PIR_MAX_SENSITIVITY + 1))
         {
@@ -305,7 +305,7 @@ void on_write(ble_cb_t *p_cb, ble_evt_t const *p_ble_evt)
         (p_evt_write->len == 1))
     //(p_cb->pir_write_handler != NULL)
     {
-        request_led_on = true;
+        //request_led_on = true;
         // p_cb->pir_write_handler(p_ble_evt->evt.gap_evt.conn_handle, p_cb, p_evt_write->data[0]);
         if ((p_evt_write->data[0] > LDR_MIN_SENSITIVITY - 1) && (p_evt_write->data[0] < LDR_MAX_SENSITIVITY + 1))
         {
