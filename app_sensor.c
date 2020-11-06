@@ -39,14 +39,9 @@ extern bool request_led_on;
 extern uint8_t pir_sensitivity;
 
 extern linear_param_t pir_adc_calculate;
-extern uint16_t pir_adc_value;
+// extern uint16_t pir_adc_value;
 
 // uint16_t pir_offset_value[2] = {1450, 2550};
-pir_offset_t pir_offset_value_default = {
-    .max_offset = 2550,
-    .min_offset = 1450};
-;
-pir_offset_t pir_offset_calculated;
 bool magnetic_flag = false;
 
 sensor_param_t pir_state = {
@@ -77,10 +72,14 @@ void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 }
 #ifndef PIR_HARDWARE_CALIB33
 
+void SENSOR_PIR_CalculateThreshold(void)
+{
+    pir_adc_calculate.threshold = XMAX/20 + (PIR_MAX_SENSITIVITY - pir_sensitivity)/20;
+}
 
 void SENSOR_PIR_Software_Reg(void)
 {
-    if ((pir_adc_value < (pir_offset_calculated.min_offset + pir_adc_calculate.pir_scale * pir_sensitivity)) || (pir_adc_value > (pir_offset_calculated.max_offset - pir_adc_calculate.pir_scale * pir_sensitivity)))
+    if (pir_adc_calculate.x > pir_adc_calculate.threshold)
     {
         pir_state.current_logic = 1;
         // NRF_LOG_INFO("%d", (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity));
@@ -198,6 +197,7 @@ void SENSOR_MagneticTask(void)
 }
 void SENSOR_PIR_Task(void)
 {
+    SENSOR_PIR_CalculateThreshold();
 #ifndef PIR_HARDWARE_CALIB
     SENSOR_PIR_Software_Reg();
 #endif

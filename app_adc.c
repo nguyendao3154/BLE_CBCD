@@ -33,7 +33,7 @@
 
 #define NUMBER_OF_CELL_ADC_POINT 4
 uint16_t adc_time_send;
-uint16_t pir_adc_value;
+// uint16_t pir_adc_value;
 uint16_t ldr_adc_value;
 
 bool is_cell_adc_ready_to_sent = true;
@@ -54,11 +54,6 @@ uint16_t battery_adc_table[NUMBER_OF_CELL_ADC_POINT] = {615, 675, 830, 950};
 uint8_t battery_percent_table[NUMBER_OF_CELL_ADC_POINT] = {0, 10, 90, 100};
 volatile uint8_t cell_percent;
 static uint16_t u16pinvalue;
-
-linear_param_t pir_adc_ref = {
-    .Vdd_10 = 30,
-    .k = 8192,
-    .pir_scale = 30};
 
 linear_param_t pir_adc_calculate;
 /**
@@ -97,7 +92,7 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
         pir_adc_calculate.Vdd_10 = (p_event->data.done.p_buffer[1]) * TEN_TIMES_V_REF * 100 * ADC_GAIN_SOFTWARE / HUNDRED_TIMES_ADC_GAIN_HARDWARE / ADC_RESOLUTION;
         u16pinvalue = (p_event->data.done.p_buffer[1]);
 
-        pir_adc_value = (p_event->data.done.p_buffer[0]) * 100 / HUNDRED_TIMES_ADC_GAIN_HARDWARE / pir_adc_calculate.Vdd_10 * 24;
+        pir_adc_calculate.x = 222*(p_event->data.done.p_buffer[0])/10 - pir_adc_calculate.Vdd_10*3413/10;
         //pir_adc_value = (p_event->data.done.p_buffer[0]);
         ldr_adc_value = (p_event->data.done.p_buffer[2]);
         //Clear the SAADC interrupt if set
@@ -201,19 +196,11 @@ void cell_calculate_and_send(void)
         BLECB_CheckError(err_code);
     }
 }
-void ADC_PIR_ScaleInterval(void)
-{
-    pir_adc_calculate.k = LINEAR_PAM_A * pir_adc_calculate.Vdd_10 + LINEAR_PAM_B;
-    pir_adc_calculate.pir_scale = pir_adc_calculate.k * pir_adc_ref.pir_scale / pir_adc_ref.k;
-    pir_offset_calculated.min_offset = 2000 - pir_adc_calculate.pir_scale * PIR_MAX_SEN;
-    pir_offset_calculated.max_offset = 2000 + pir_adc_calculate.pir_scale * PIR_MAX_SEN;
-}
 void ADC_Task(void)
 {
 
     if (is_ADC_initialized)
     {
-        ADC_PIR_ScaleInterval();
         // NRF_LOG_INFO("%d, %d", u16pinvalue, pir_adc_value);
         //NRF_LOG_INFO("%d, %d", pir_adc_value, pir_adc_calculate.pir_scale);
 				

@@ -22,13 +22,14 @@
 #include "BLE_spec.h"
 #include "app_sensor.h"
 
-#define LINEAR_PAM_A 171
-#define LINEAR_PAM_B 3071
-/* 171*Vdd*10 + 3071 = k*PIR_INV */
+#define XMAX 6480
+
+/* See documents to know what is x, y*/
 typedef struct linear_param{
     uint16_t Vdd_10;
-    uint16_t k;
-    uint16_t pir_scale;
+    uint16_t threshold;
+    uint16_t y;
+    uint16_t x;
 }linear_param_t;
 
 void ADC_DeinitDriver(void);
