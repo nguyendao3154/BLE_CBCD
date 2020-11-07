@@ -74,16 +74,17 @@ void SENSOR_MagneticHandle(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t actio
 
 void SENSOR_PIR_CalculateThreshold(void)
 {
-    pir_adc_calculate.threshold = XMAX/20 + (PIR_MAX_SENSITIVITY - pir_sensitivity)/20;
+    pir_adc_calculate.threshold = XMAX/10 + (PIR_MAX_SENSITIVITY - pir_sensitivity)*XMAX/30;
 }
 
 void SENSOR_PIR_Software_Reg(void)
 {
-    if (pir_adc_calculate.x > pir_adc_calculate.threshold)
+    if ((pir_adc_calculate.x > pir_adc_calculate.threshold) && pir_adc_calculate.x < 50000)	
     {
         pir_state.current_logic = 1;
-        // NRF_LOG_INFO("%d", (pir_offset_value[0] + PIR_INTERVAL_SCALE * pir_sensitivity));
-        //    NRF_LOG_INFO("adc = %d",pir_adc_value);
+     
+            NRF_LOG_INFO("adc = %d, %d",pir_adc_calculate.x, pir_adc_calculate.threshold);
+			NRF_LOG_INFO("CD");
     }
     else
     {

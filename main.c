@@ -82,7 +82,7 @@ void get_mac_address(void)
 int main(void)
 {
   // Initialize.
-  log_init();
+  //log_init();
   timers_init();
   power_management_init();
   SENSOR_InterruptInit();
@@ -113,7 +113,7 @@ int main(void)
     SENSOR_PIR_Task();
     ADC_Task();
     LED_Task();
-    NRF_LOG_FLUSH();
+    //NRF_LOG_FLUSH();
     nrf_pwr_mgmt_run();
     //sd_power_system_off();
   }

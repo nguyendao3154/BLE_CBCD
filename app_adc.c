@@ -33,7 +33,7 @@
 
 #define NUMBER_OF_CELL_ADC_POINT 4
 uint16_t adc_time_send;
-// uint16_t pir_adc_value;
+uint16_t pir_adc_value;
 uint16_t ldr_adc_value;
 
 bool is_cell_adc_ready_to_sent = true;
@@ -93,7 +93,7 @@ void ADC_CallBack(nrf_drv_saadc_evt_t const *p_event)
         u16pinvalue = (p_event->data.done.p_buffer[1]);
 
         pir_adc_calculate.x = 222*(p_event->data.done.p_buffer[0])/10 - pir_adc_calculate.Vdd_10*3413/10;
-        //pir_adc_value = (p_event->data.done.p_buffer[0]);
+        pir_adc_value = (p_event->data.done.p_buffer[0]);
         ldr_adc_value = (p_event->data.done.p_buffer[2]);
         //Clear the SAADC interrupt if set
         ADC_DeinitDriver(); // gui xong du lieu ADC, tat ADC driver de tiet kiem nang luong
@@ -201,8 +201,9 @@ void ADC_Task(void)
 
     if (is_ADC_initialized)
     {
-        // NRF_LOG_INFO("%d, %d", u16pinvalue, pir_adc_value);
-        //NRF_LOG_INFO("%d, %d", pir_adc_value, pir_adc_calculate.pir_scale);
+         //NRF_LOG_INFO("%d", pir_adc_value);
+				if(pir_adc_calculate.x < 60000)
+        NRF_LOG_INFO("%d", pir_adc_calculate.x);
 				
 				
         adc_time_send++;
